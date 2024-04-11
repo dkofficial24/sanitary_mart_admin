@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "684537233683",
+    "project_id": "sanitary-mart-d87f5",
+    "storage_bucket": "sanitary-mart-d87f5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684537233683:android:db76d8bdfcfb8923949ae6",
+        "android_client_info": {
+          "package_name": "com.codexia.sanitary_mart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684537233683-0tbqshk7fnsl90bko19pndivnr4fa6m1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.codexia.sanitary_mart",
+            "certificate_hash": "575ae95a7f409992fdba56b8914f352a13b3470b"
+          }
+        },
+        {
+          "client_id": "684537233683-l2gpn4fe4hr7d63emnbogeceqs6kvd5u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCouwrdZim8l0Sd_CqBc-UDcZGiFKWZKSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "684537233683-l2gpn4fe4hr7d63emnbogeceqs6kvd5u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "684537233683-3kugfrqvgot43drtmefcvg1uvudtv3g1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.codexia.sanitaryMart"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:684537233683:android:b24237040e4cf63f949ae6",
+        "android_client_info": {
+          "package_name": "com.codexia.sanitary_mart_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "684537233683-l2gpn4fe4hr7d63emnbogeceqs6kvd5u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCouwrdZim8l0Sd_CqBc-UDcZGiFKWZKSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "684537233683-l2gpn4fe4hr7d63emnbogeceqs6kvd5u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "684537233683-3kugfrqvgot43drtmefcvg1uvudtv3g1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.codexia.sanitaryMart"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
