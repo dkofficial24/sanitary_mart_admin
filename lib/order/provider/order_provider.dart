@@ -17,6 +17,7 @@ class OrderProvider extends ChangeNotifier {
   Future loadOrders() async {
     try {
       _state = ProviderState.loading;
+      notifyListeners();
       customerOrders = await Get.find<OrderFirebaseService>().fetchAllUserOrders();
       _state = ProviderState.idle;
     } catch (e) {
