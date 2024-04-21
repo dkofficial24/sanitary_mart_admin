@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/widget.dart';
 import 'package:sanitary_mart_admin/order/model/order_model.dart';
 
 class OrderCard extends StatelessWidget {
@@ -11,6 +11,7 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double total = 0;
+    double discount = 0;
     return Card(
       margin: const EdgeInsets.all(10.0),
       child: Padding(
@@ -20,7 +21,8 @@ class OrderCard extends StatelessWidget {
           children: [
             Text(
               'Order ID: ${order.orderId}',
-              style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              style:
+                  const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             Text('Date: ${_formatDate(order.createdAt)}'),
@@ -33,44 +35,62 @@ class OrderCard extends StatelessWidget {
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
             ),
             ...order.orderItems.map((item) {
-              total = total+item.price;
-              return ListTile(
-                title: Text(item.productName),
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  // Rounded corners
-                  child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: NetworkImageWidget(
-                      item.productImg ?? '',
+              total = total + (item.price * item.quantity);
+              discount = discount + (item.discountAmount * item.quantity);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      // Rounded corners
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: NetworkImageWidget(
+                          item.productImg ?? '',
+                        ),
+                      ),
                     ),
+                    title: Text(item.productName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Brand: ${item.brand}'),
+                        Text('Quantity: ${item.quantity}'),
+                      ],
+                    ),
+                    trailing: Text('\$${item.price.toStringAsFixed(2)}'),
                   ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Brand: ${item.brand}'),
-                    Text('Quantity: ${item.quantity}'),
-                  ],
-                ),
-                trailing: Text('\$${item.price.toStringAsFixed(2)}'),
+                ],
               );
             }),
-
             const Divider(),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total:'),
-                    Text(total.toString()),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total:'),
+                      Text(total.toString()),
+                    ],
+                  ),
+                  if(discount>0)Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Points:',
+                        style: TextStyle(color: Colors.green),
+                      ),
+                      Text((discount / 10).toStringAsFixed(2),
+                          style: const TextStyle(color: Colors.green)),
+                    ],
+                  ),
+                ],
               ),
-              // Add more customer details here if needed
+            ),
           ],
         ),
       ),

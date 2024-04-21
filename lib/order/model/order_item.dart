@@ -1,11 +1,11 @@
-
 class OrderItem {
   String productId;
   String productName;
+  String brand;
   double price;
   int quantity;
-  String brand;
   String? productImg;
+  double discountAmount;
 
   OrderItem({
     required this.productId,
@@ -13,6 +13,7 @@ class OrderItem {
     required this.price,
     required this.quantity,
     required this.brand,
+    this.discountAmount = 0,
     this.productImg,
   });
 
@@ -25,6 +26,7 @@ class OrderItem {
       'quantity': quantity,
       'brand': brand,
       'productImg': productImg,
+      'discountAmount': discountAmount,
     };
   }
 
@@ -36,6 +38,7 @@ class OrderItem {
       quantity: json['quantity'],
       productImg: json['productImg'],
       brand: json['brand'],
+      discountAmount: json['discountAmount'] ?? 0,
     );
   }
 }
