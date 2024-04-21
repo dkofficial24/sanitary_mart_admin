@@ -25,8 +25,8 @@ class AddBrandScreenState extends State<AddBrandScreen> {
           ),
           body: AddEditBrandWidget(
             actionButtonName: 'Add Brand',
-            onAction: (category) async {
-              addBrand(context, category);
+            onAction: (brand) async {
+              addBrand(context, brand);
             },
           ),
         );
