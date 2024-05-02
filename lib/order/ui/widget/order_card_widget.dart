@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:sanitary_mart_admin/core/widget/custom_auto_complete_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/widget.dart';
 import 'package:sanitary_mart_admin/order/model/order_model.dart';
+import 'package:sanitary_mart_admin/order/model/order_status.dart';
+import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 
-class OrderCard extends StatelessWidget {
+class OrderCard extends StatefulWidget {
+  const OrderCard({required this.order, super.key});
+
   final OrderModel order;
 
-  const OrderCard({Key? key, required this.order}) : super(key: key);
+  @override
+  State<OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<OrderCard> {
+  OrderStatus? selectedOrderStatus;
+
+  @override
+  void initState() {
+    selectedOrderStatus = widget.order.orderStatus;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,21 +38,46 @@ class OrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order ID: ${order.orderId}',
+              'Order ID: ${widget.order.orderId}',
               style:
                   const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Text('Date: ${_formatDate(order.createdAt)}'),
+            Text('Date: ${_formatDate(widget.order.createdAt)}'),
             const SizedBox(height: 10),
-            Text('Status: ${order.orderStatus ? "Completed" : "Pending"}'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Order Status'),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width*0.5,
+                  child: CustomAutoCompleteWidget<String>(
+                    label: '',
+                    initailValue: selectedOrderStatus?.name.capitalizeFirst,
+                    options: OrderStatus.values
+                        .map((e) => e.name.capitalizeFirst.toString())
+                        .toList(),
+                    onSuggestionSelected: (String? orderStatus) {
+                      if (orderStatus == null) return;
+                      setState(() {
+                        selectedOrderStatus = parseOrderStatus(orderStatus);
+                      });
+                      widget.order.orderStatus = selectedOrderStatus!;
+                      Provider.of<OrderProvider>(context,listen: false).updateOrderStatus(
+                        widget.order,
+                      );
+                    },
+                  ),
+                )
+              ],
+            ),
             const SizedBox(height: 10),
             const Divider(),
             const Text(
               'Items:',
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
             ),
-            ...order.orderItems.map((item) {
+            ...widget.order.orderItems.map((item) {
               total = total + (item.price * item.quantity);
               discount = discount + (item.discountAmount * item.quantity);
               return Column(
@@ -77,17 +120,18 @@ class OrderCard extends StatelessWidget {
                       Text(total.toString()),
                     ],
                   ),
-                  if(discount>0)Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Points:',
-                        style: TextStyle(color: Colors.green),
-                      ),
-                      Text((discount / 10).toStringAsFixed(2),
-                          style: const TextStyle(color: Colors.green)),
-                    ],
-                  ),
+                  if (discount > 0 && widget.order.userVerified)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Points:',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                        Text((discount / 10).toStringAsFixed(2),
+                            style: const TextStyle(color: Colors.green)),
+                      ],
+                    ),
                 ],
               ),
             ),

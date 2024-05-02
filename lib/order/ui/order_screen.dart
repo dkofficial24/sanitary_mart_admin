@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/core/widget/translucent_overlay_loader.dart';
+import 'package:sanitary_mart_admin/order/model/order_status.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/ui/order_detail_screen.dart';
+import 'package:sanitary_mart_admin/order/ui/widget/order_filter_bottom_screen.dart';
 
 class OrderScreen extends StatefulWidget {
   const OrderScreen({Key? key}) : super(key: key);
@@ -15,6 +17,7 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +33,9 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Orders'),
+      appBar: const CustomAppBar(
+        title: 'Order\'s Customers List',
+      ),
       body: Consumer<OrderProvider>(
         builder: (context, provider, child) {
           if (provider.state == ProviderState.idle &&
@@ -47,7 +52,7 @@ class _OrderScreenState extends State<OrderScreen> {
           return TranslucentOverlayLoader(
             enabled: provider.state == ProviderState.loading,
             child: ListView.builder(
-              itemCount: provider.customerOrders!.length,
+              itemCount: provider.customerOrders?.length ?? 0,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 final customerOrder =
@@ -69,4 +74,6 @@ class _OrderScreenState extends State<OrderScreen> {
       ),
     );
   }
+
+
 }

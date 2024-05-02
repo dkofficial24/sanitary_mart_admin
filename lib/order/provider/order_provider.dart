@@ -13,12 +13,12 @@ class OrderProvider extends ChangeNotifier {
 
   Map<Customer, List<OrderModel>>? customerOrders;
 
-
   Future loadOrders() async {
     try {
       _state = ProviderState.loading;
       notifyListeners();
-      customerOrders = await Get.find<OrderFirebaseService>().fetchAllUserOrders();
+      customerOrders =
+          await Get.find<OrderFirebaseService>().fetchAllUserOrders();
       _state = ProviderState.idle;
     } catch (e) {
       _state = ProviderState.error;
@@ -28,4 +28,21 @@ class OrderProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future updateOrderStatus(OrderModel orderModel) async {
+    try {
+      _state = ProviderState.loading;
+      notifyListeners();
+      await (Get.find<OrderFirebaseService>()
+          .updateOrderStatus(orderModel.customer!.uId, orderModel));
+      _state = ProviderState.idle;
+    } catch (e) {
+      _state = ProviderState.error;
+      AppUtil.showToast(e.toString());
+      Log.e(e.toString());
+    } finally {
+      notifyListeners();
+    }
+  }
+
 }

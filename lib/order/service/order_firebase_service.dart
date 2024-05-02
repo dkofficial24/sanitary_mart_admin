@@ -23,14 +23,22 @@ class OrderFirebaseService {
 
         List<OrderModel> orders = ordersSnapshot.docs.map((doc) {
           OrderModel orderModel = OrderModel.fromJson(doc.data());
-          orderModel.customer = customer;
-          return orderModel;
-        }).toList();
+        orderModel.customer = customer;
+        return orderModel;
+      }).toList();
 
-        userOrdersMap[customer] = orders;
-      }
+      userOrdersMap[customer] = orders;
+    }
 
-      return userOrdersMap;
+    return userOrdersMap;
+  }
 
+  Future updateOrderStatus(String uId, OrderModel orderModel) async {
+    await FirebaseFirestore.instance
+        .collection('orders')
+        .doc(uId)
+        .collection('confirmOrders')
+        .doc(orderModel.orderId)
+        .update({'orderStatus': orderModel.orderStatus.name});
   }
 }

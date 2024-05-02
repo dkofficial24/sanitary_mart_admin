@@ -1,21 +1,24 @@
 import 'package:sanitary_mart_admin/order/model/customer_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_item.dart';
+import 'package:sanitary_mart_admin/order/model/order_status.dart';
 
 class OrderModel {
   String orderId;
   List<OrderItem> orderItems;
   int? createdAt;
   int? updatedAt;
-  bool orderStatus;
+  OrderStatus orderStatus;
   Customer? customer;
+  bool userVerified;
 
   OrderModel({
     required this.orderId,
     required this.orderItems,
     this.customer,
-    this.orderStatus = false,
+    this.orderStatus = OrderStatus.pending,
     this.createdAt,
     this.updatedAt,
+    this.userVerified=false,
   });
 
   // Convert OrderModel instance to Map for serialization
@@ -26,6 +29,7 @@ class OrderModel {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'orderStatus': orderStatus,
+      'userVerified': userVerified,
     };
   }
 
@@ -39,7 +43,8 @@ class OrderModel {
       orderItems: orderItemsList,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      orderStatus: json['orderStatus'],
+      userVerified: json['userVerified'] ??false,
+      orderStatus: parseOrderStatus(json['orderStatus']),
       customer:
           json['customer'] != null ? Customer.fromJson(json['customer']) : null,
     );
