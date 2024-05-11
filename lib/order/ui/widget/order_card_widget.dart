@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get_utils/src/extensions/string_extensions.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/widget/custom_auto_complete_widget.dart';
-import 'package:sanitary_mart_admin/core/widget/widget.dart';
 import 'package:sanitary_mart_admin/order/model/order_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_status.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
+import 'package:sanitary_mart_admin/order/ui/widget/order_as_pdf.dart';
 
 class OrderCard extends StatefulWidget {
-  const OrderCard({required this.order, super.key});
-
-  final OrderModel order;
+  const OrderCard({
+    required this.order,
+    super.key});
+   final OrderModel order;
 
   @override
   State<OrderCard> createState() => _OrderCardState();
@@ -26,6 +27,7 @@ class _OrderCardState extends State<OrderCard> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
     double total = 0;
@@ -37,18 +39,49 @@ class _OrderCardState extends State<OrderCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Order ID: ${widget.order.orderId}',
-              style:
-                  const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Shri Balaji Sanitary & Elec.',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(onPressed: (){
+                  shareOrderAsPdf(context,widget.order);
+                }, icon: const Icon(Icons.share)) ,IconButton(onPressed: (){
+                  downloadOrderAsPdf(context,widget.order);
+                }, icon: const Icon(Icons.download))
+              ],
+            ),
+            const Text(
+              'Bhiwani Road, Bahal',
+              style: TextStyle(
+                fontSize: 16.0,
+              ),
+            ),
+            const Text(
+              'Phone: 9555294879',
+              style: TextStyle(
+                fontSize: 16.0,
+              ),
             ),
             const SizedBox(height: 10),
+            Text(
+              'Order ID: ${widget.order.orderId}',
+              style: const TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Text('Date: ${_formatDate(widget.order.createdAt)}'),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Order Status'),
+                const Text('Status:', style: TextStyle(fontSize: 16.0)),
                 SizedBox(
                   width: MediaQuery.of(context).size.width*0.5,
                   child: CustomAutoCompleteWidget<String>(
@@ -59,56 +92,49 @@ class _OrderCardState extends State<OrderCard> {
                         .toList(),
                     onSuggestionSelected: (String? orderStatus) {
                       if (orderStatus == null) return;
-                      setState(() {
-                        selectedOrderStatus = parseOrderStatus(orderStatus);
-                      });
-                      widget.order.orderStatus = selectedOrderStatus!;
-                      Provider.of<OrderProvider>(context,listen: false).updateOrderStatus(
-                        widget.order,
-                      );
+                      onOrderUpdate(orderStatus, context);
                     },
                   ),
-                )
+                ),
               ],
             ),
             const SizedBox(height: 10),
             const Divider(),
-            const Text(
-              'Items:',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            ),
-            ...widget.order.orderItems.map((item) {
-              total = total + (item.price * item.quantity);
-              discount = discount + (item.discountAmount * item.quantity);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      // Rounded corners
-                      child: SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: NetworkImageWidget(
-                          item.productImg ?? '',
-                        ),
+            DataTable(
+              dataRowMinHeight: 10,
+              dataRowMaxHeight: 65,
+              columns: const [
+                // DataColumn(label: Text('Sr')),
+                DataColumn(label: SizedBox(child: Text('Items'))),
+                DataColumn(
+                  label: Text('Qty'),
+                ),
+                DataColumn(
+                  label: Text('Price'),
+                ),
+              ],
+              rows: widget.order.orderItems.map((item) {
+                total += item.price * item.quantity;
+                discount += item.discountAmount * item.quantity;
+                return DataRow(
+                  cells: [
+                    // DataCell(Text(
+                    //   (widget.order.orderItems.indexOf(item) + 1).toString(),
+                    // )),
+                    DataCell(
+                      SizedBox(
+                        child: Text(item.productName),
+                        // width: 100,
                       ),
                     ),
-                    title: Text(item.productName),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Brand: ${item.brand}'),
-                        Text('Quantity: ${item.quantity}'),
-                      ],
-                    ),
-                    trailing: Text('\$${item.price.toStringAsFixed(2)}'),
-                  ),
-                ],
-              );
-            }),
+                    DataCell(Text(item.quantity.toString())),
+                    DataCell(Text((item.price).toStringAsFixed(2))),
+                  ],
+                );
+              }).toList(),
+            ),
             const Divider(),
+            // Summary Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -116,8 +142,11 @@ class _OrderCardState extends State<OrderCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total:'),
-                      Text(total.toString()),
+                      const Text('Total:', style: TextStyle(fontSize: 16.0)),
+                      Text(
+                        total.toStringAsFixed(2),
+                        style: const TextStyle(fontSize: 16.0),
+                      ),
                     ],
                   ),
                   if (discount > 0 && widget.order.userVerified)
@@ -126,10 +155,18 @@ class _OrderCardState extends State<OrderCard> {
                       children: [
                         const Text(
                           'Points:',
-                          style: TextStyle(color: Colors.green),
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.green,
+                          ),
                         ),
-                        Text((discount / 10).toStringAsFixed(2),
-                            style: const TextStyle(color: Colors.green)),
+                        Text(
+                          (discount / 10).toStringAsFixed(2),
+                          style: const TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.green,
+                          ),
+                        ),
                       ],
                     ),
                 ],
@@ -141,9 +178,40 @@ class _OrderCardState extends State<OrderCard> {
     );
   }
 
+  Future onOrderUpdate(String orderStatus, BuildContext context)async {
+    setState(() {
+      selectedOrderStatus = parseOrderStatus(orderStatus);
+    });
+    widget.order.orderStatus = selectedOrderStatus!;
+    final orderProvider = Provider.of<OrderProvider>(context,listen: false);
+    await orderProvider.updateOrderStatus(
+      widget.order,
+    );
+    // if(orderProvider.state != ProviderState.error && mounted) {
+    //   orderProvider.loadOrders();
+    // }
+  }
+
   String _formatDate(int? timestamp) {
     if (timestamp == null) return 'Unknown date';
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     return DateFormat.yMMMd().format(date); // Example format: Jan 28, 2020
   }
+
+  Color getStatusColor(OrderStatus orderStatus) {
+    switch (orderStatus) {
+      case OrderStatus.pending:
+        return Colors.purple;
+      case OrderStatus.delivered:
+        return Colors.green;
+      case OrderStatus.canceled:
+        return Colors.red;
+      case OrderStatus.returned:
+        return Colors.orange;
+      default:
+        return Colors.black87;
+    }
+  }
 }
+
+
