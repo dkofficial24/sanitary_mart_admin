@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class Brand {
+class Brand extends Equatable{
   String? id;
   String name;
   String? imagePath;
@@ -27,4 +28,7 @@ class Brand {
       imagePath: data['imagePath'],
     );
   }
+
+  @override
+  List<Object?> get props => [name, id];
 }

@@ -105,7 +105,7 @@ pw.Document createPdfDocument(OrderModel order) {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Status:', style: const pw.TextStyle(fontSize: 16)),
+                // pw.Text('Status:', style: const pw.TextStyle(fontSize: 16)),
                 pw.Text(
                   '${order.orderStatus.name.capitalize}',
                   style: pw.TextStyle(
@@ -121,7 +121,7 @@ pw.Document createPdfDocument(OrderModel order) {
                     pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
             pw.Table.fromTextArray(
               headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              headers: ['Sr', 'Items', 'Qty', 'Price'],
+              headers: ['Sr', 'Items', 'Qty', 'Price','Total'],
               cellAlignment: pw.Alignment.centerLeft,
               cellStyle: const pw.TextStyle(fontSize: 14),
               data: order.orderItems.map((item) {
@@ -130,6 +130,7 @@ pw.Document createPdfDocument(OrderModel order) {
                   item.productName,
                   item.quantity.toString(),
                   (item.price).toStringAsFixed(2),
+                  (item.price*item.quantity).toStringAsFixed(2),
                 ];
               }).toList(),
             ),
@@ -137,31 +138,31 @@ pw.Document createPdfDocument(OrderModel order) {
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('Total:', style: const pw.TextStyle(fontSize: 16)),
+                pw.Text('SubTotal:', style: const pw.TextStyle(fontSize: 16)),
                 pw.Text(
                   total.toStringAsFixed(2),
                   style: const pw.TextStyle(fontSize: 16),
                 ),
               ],
             ),
-            if (discount > 0)
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Point:',
-                    style: const pw.TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                  pw.Text(
-                    (discount / 10).toStringAsFixed(2),
-                    style: const pw.TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
+            // if (discount > 0)
+            //   pw.Row(
+            //     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       pw.Text(
+            //         'Point:',
+            //         style: const pw.TextStyle(
+            //           fontSize: 16,
+            //         ),
+            //       ),
+            //       pw.Text(
+            //         (discount / 10).toStringAsFixed(2),
+            //         style: const pw.TextStyle(
+            //           fontSize: 16,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
           ],
         ),
       ),

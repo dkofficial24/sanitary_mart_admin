@@ -10,15 +10,17 @@ abstract class BaseService {
 
   BaseService(this.collectionName);
 
-  Future<void> addData(Map<String, dynamic> data) async {
+  Future<String> addData(Map<String, dynamic> data) async {
     try {
       final collectionRef =  FirebaseFirestore.instance.collection(collectionName);
       final docRef = collectionRef.doc();
       data['id'] = docRef.id;
       await docRef.set(data);
+      return data['id'];
     } catch (e) {
       // Handle errors appropriately (e.g., print, throw exception)
       print("Error adding data: $e");
+      throw 'Unable to add data';
     }
   }
 

@@ -54,6 +54,8 @@ class Product {
       categoryId: data['categoryId'],
       brandId: data['brandId'],
       stock: data['stock'],
+      brandName: data['brandName'],
+      categoryName: data['categoryName'],
     );
   }
 }

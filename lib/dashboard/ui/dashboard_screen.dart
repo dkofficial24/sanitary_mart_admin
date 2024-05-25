@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sanitary_mart_admin/brand/ui/screen/brand_list_screen.dart';
 import 'package:sanitary_mart_admin/category/ui/screen/category_list_screen.dart';
+import 'package:sanitary_mart_admin/category/ui/screen/category_screen.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/customer/ui/customer_screen.dart';
 import 'package:sanitary_mart_admin/order/ui/order_screen.dart';
+import 'package:sanitary_mart_admin/payment/ui/payment_info_screen.dart';
 import 'package:sanitary_mart_admin/product/ui/screen/product_list_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -68,7 +70,7 @@ class DashboardScreen extends StatelessWidget {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ProductListScreen(),
+                      builder: (context) => const CategoryScreen(),
                     ),
                   ),
                 ),
@@ -83,6 +85,11 @@ class DashboardScreen extends StatelessWidget {
                   title: 'Customers',
                   icon: Icons.supervised_user_circle_sharp,
                   onPressed: () => Get.to(const CustomerScreen()),
+                ),  _buildMenuItem(
+                  context,
+                  title: 'Payment Info',
+                  icon: Icons.payments,
+                  onPressed: () => Get.to(const PaymentInfoScreen()),
                 ),
               ],
             ),

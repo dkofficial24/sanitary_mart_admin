@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:sanitary_mart_admin/brand/model/brand_model.dart';
@@ -23,13 +24,16 @@ class BrandProvider extends ChangeNotifier {
 
   String? get error => _error;
 
-  Future<void> addBrand(Brand item) async {
+  Future<void> addBrand(Brand item, {String? categoryId}) async {
     try {
       _error = null;
       notifyListeners();
       String? imgUploadPath = await uploadBrandImage(item.imagePath);
       item.imagePath = imgUploadPath;
-      await firebaseService.addBrand(item);
+      String brandId = await firebaseService.addBrand(item);
+      if (categoryId != null) {
+        addCategoryBrandAssociation(categoryId, brandId);
+      }
       AppUtil.showToast('Brand added successfully!');
       _brandList.add(item);
       _state = ProviderState.idle;
@@ -42,6 +46,17 @@ class BrandProvider extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  Future<void> addCategoryBrandAssociation(
+      String categoryId, String brandId) async {
+    final CollectionReference association =
+        FirebaseFirestore.instance.collection('category_brand');
+    await association.add({
+      'categoryId': categoryId,
+      'brandId': brandId,
+    });
+    FirebaseAnalytics.instance.logEvent(name: 'add_category_brand_association');
   }
 
   Future<String?> uploadBrandImage(String? imagePath) async {
@@ -165,6 +180,23 @@ class BrandProvider extends ChangeNotifier {
       _error = 'Failed to delete item: $e';
       _state = ProviderState.error;
       FirebaseAnalytics.instance.logEvent(name: 'error_delete_brand');
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> getBrandsByCategory(String categoryId) async {
+    try {
+      _state = ProviderState.loading;
+      _brandList.clear();
+      notifyListeners();
+
+      _brandList = await firebaseService.getBrandsByCategory(categoryId);
+
+      _state = ProviderState.idle;
+    } catch (e) {
+      _error = 'Failed to fetch items: $e';
+      _state = ProviderState.error;
     } finally {
       notifyListeners();
     }

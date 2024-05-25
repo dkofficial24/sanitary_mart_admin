@@ -8,9 +8,10 @@ import 'package:sanitary_mart_admin/core/core.dart';
 
 
 class UpdateBrandScreen extends StatefulWidget {
-  const UpdateBrandScreen(this.brand, {super.key});
+  const UpdateBrandScreen(this.brand, {this.categoryId,super.key});
 
   final Brand brand;
+  final String? categoryId;
 
   @override
   UpdateBrandScreenState createState() => UpdateBrandScreenState();
@@ -55,7 +56,12 @@ class UpdateBrandScreenState extends State<UpdateBrandScreen> {
   void updateBrand(BuildContext context, Brand brand) async {
     BrandProvider brandProvider = getBrandProvider(context);
     await brandProvider.updateBrand(brand);
-    brandProvider.fetchBrands();
+    if(widget.categoryId!=null){
+      brandProvider.fetchBrandsByCategory(widget.categoryId!);
+    }
+    else {
+      brandProvider.fetchBrands();
+    }
     Get.back();
   }
 }

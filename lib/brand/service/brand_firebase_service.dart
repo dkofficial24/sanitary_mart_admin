@@ -17,8 +17,8 @@ class BrandFirebaseService extends BaseService {
     }
   }
 
-  Future<void> addBrand(Brand item) async {
-    await addData(item.toFirebase());
+  Future<String> addBrand(Brand item) async {
+    return await addData(item.toFirebase());
   }
 
   Future<List<Brand>> getBrandsByCategory(String categoryId) async {

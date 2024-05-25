@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_utils/src/extensions/string_extensions.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:sanitary_mart_admin/core/widget/copy_button_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/custom_auto_complete_widget.dart';
 import 'package:sanitary_mart_admin/order/model/order_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_status.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/ui/widget/order_as_pdf.dart';
+import 'package:sanitary_mart_admin/product/service/product_service.dart';
 
 class OrderCard extends StatefulWidget {
   const OrderCard({
@@ -20,13 +22,13 @@ class OrderCard extends StatefulWidget {
 
 class _OrderCardState extends State<OrderCard> {
   OrderStatus? selectedOrderStatus;
+  OrderStatus? prevOrderStatus;
 
   @override
   void initState() {
     selectedOrderStatus = widget.order.orderStatus;
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -69,12 +71,17 @@ class _OrderCardState extends State<OrderCard> {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
-              'Order ID: ${widget.order.orderId}',
-              style: const TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Text(
+                  'Order ID: ${widget.order.orderId}',
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                CopyIconButton(widget.order.orderId)
+              ],
             ),
             Text('Date: ${_formatDate(widget.order.createdAt)}'),
             const SizedBox(height: 10),
@@ -112,9 +119,13 @@ class _OrderCardState extends State<OrderCard> {
                 DataColumn(
                   label: Text('Price'),
                 ),
+                DataColumn(
+                  label: Text('Total'),
+                ),
               ],
               rows: widget.order.orderItems.map((item) {
-                total += item.price * item.quantity;
+                double itemTotal = item.price * item.quantity;
+                total += itemTotal;
                 discount += item.discountAmount * item.quantity;
                 return DataRow(
                   cells: [
@@ -129,6 +140,7 @@ class _OrderCardState extends State<OrderCard> {
                     ),
                     DataCell(Text(item.quantity.toString())),
                     DataCell(Text((item.price).toStringAsFixed(2))),
+                    DataCell(Text((itemTotal.toStringAsFixed(2)))),
                   ],
                 );
               }).toList(),
@@ -142,7 +154,7 @@ class _OrderCardState extends State<OrderCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total:', style: TextStyle(fontSize: 16.0)),
+                      const Text('SubTotal:', style: TextStyle(fontSize: 16.0)),
                       Text(
                         total.toStringAsFixed(2),
                         style: const TextStyle(fontSize: 16.0),
@@ -180,13 +192,32 @@ class _OrderCardState extends State<OrderCard> {
 
   Future onOrderUpdate(String orderStatus, BuildContext context)async {
     setState(() {
+      prevOrderStatus = selectedOrderStatus;
       selectedOrderStatus = parseOrderStatus(orderStatus);
+
+      widget.order.orderStatus = selectedOrderStatus!;
     });
-    widget.order.orderStatus = selectedOrderStatus!;
-    final orderProvider = Provider.of<OrderProvider>(context,listen: false);
+
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     await orderProvider.updateOrderStatus(
       widget.order,
     );
+
+    if (selectedOrderStatus == OrderStatus.delivered) {
+      Get.find<ProductService>().updateProductQuantity(
+        widget.order.orderItems,
+        delivered: true,
+      );
+    } else {
+      if (selectedOrderStatus != prevOrderStatus &&
+          prevOrderStatus == OrderStatus.delivered) {
+        Get.find<ProductService>().updateProductQuantity(
+          widget.order.orderItems,
+          delivered: false,
+        );
+      }
+    }
+
     // if(orderProvider.state != ProviderState.error && mounted) {
     //   orderProvider.loadOrders();
     // }

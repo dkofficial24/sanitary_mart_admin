@@ -9,6 +9,7 @@ import 'package:sanitary_mart_admin/brand/provider/brand_provider.dart';
 import 'package:sanitary_mart_admin/category/model/category_model.dart';
 import 'package:sanitary_mart_admin/category/provider/category_provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/error_retry_widget.dart';
 import 'package:sanitary_mart_admin/product/model/product_model.dart';
 import 'package:sanitary_mart_admin/product/provider/product_provider.dart';
 
@@ -56,24 +57,20 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     descriptionController.text = product.description;
     percentDiscountController.text = product.discountPercentage.toString();
     stockQuantityController.text = product.stock.toString();
-    _image = File(product.image);
   }
 
   Future init() async {
     if (widget.initialProduct != null) {
       initEditProduct(); // Assuming 'image' is a file path
-    } else {
-      FirebaseAnalytics.instance.logEvent(name: 'open_product_add');
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.wait([fetchCategories(), fetchBrands()]);
-      if (widget.initialProduct != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         fetchBrandAndCategory(
           widget.initialProduct!.categoryId,
           widget.initialProduct!.brandId,
         );
-      }
-    });
+      });
+    } else {
+      FirebaseAnalytics.instance.logEvent(name: 'open_product_add');
+    }
   }
 
   Future<void> getImage() async {
@@ -135,26 +132,19 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     if (productProvider.error ||
         brandProvider.state == ProviderState.error ||
         categoryProvider.state == ProviderState.error) {
-      return Center(
-          child: Column(
-        children: [
-          const Text('Something went wrong.\n Please try again'),
-          const SizedBox(height: 16),
-          TextButton(
-              onPressed: () {
-                if (productProvider.error) {
-                  _addEditProduct(context);
-                }
-                if (categoryProvider.error != null) {
-                  fetchCategories();
-                }
-                if (brandProvider.error != null) {
-                  fetchBrands();
-                }
-              },
-              child: const Text('Retry'))
-        ],
-      ));
+      return ErrorRetryWidget(
+        onRetry: () {
+          if (productProvider.error) {
+            _addEditProduct(context);
+          }
+          if (categoryProvider.error != null) {
+            fetchCategories();
+          }
+          if (brandProvider.error != null) {
+            fetchBrands();
+          }
+        },
+      );
     }
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -378,20 +368,22 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
         border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: _image == null
+      child: _image == null && !isEditing
           ? const Center(
               child: Text(
                 'No image selected',
                 style: TextStyle(color: Colors.grey),
               ),
             )
-          : Image.file(_image!, fit: BoxFit.cover),
+          : isEditing
+              ? NetworkImageWidget(widget.initialProduct?.image ?? '')
+              : Image.file(_image!, fit: BoxFit.cover),
     );
   }
 
   void _addEditProduct(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      if (_image?.existsSync() ?? false) {
+      if (isImageAvailable()) {
         final String name = nameController.text;
         final double price = double.parse(priceController.text);
         final String description = descriptionController.text;
@@ -438,12 +430,27 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     }
   }
 
+  bool isImageAvailable() {
+    //todo
+    return isEditing || (_image?.existsSync() ?? false);
+  }
+
   Future fetchBrandAndCategory(String categoryId, String brandId) async {
-    // final category = categoryProvider.categoryList.firstWhere((element) =>
-    // element.id == widget.initialProduct!.categoryId);
-    // final brand = brandProvider.brandList.firstWhere((element) =>
-    // element.id == widget.initialProduct!.brandId);
-    //FirebaseAnalytics.instance.logEvent(name: 'fetch_brand_and_ategory');
+    CategoryProvider categoryProvider =
+        Provider.of<CategoryProvider>(context, listen: false);
+    BrandProvider brandProvider =
+        Provider.of<BrandProvider>(context, listen: false);
+
+    final result = await Future.wait([
+      categoryProvider.fetchCategoryById(categoryId),
+      brandProvider.fetchBrandById(brandId)
+    ]);
+
+    selectedCategory = result.isNotEmpty ? result[0] as Category? : null;
+    selectedBrand = result.length > 1 ? result[1] as Brand? : null;
+    if (mounted) setState(() {});
+
+    FirebaseAnalytics.instance.logEvent(name: 'fetch_brand_and_category');
   }
 
   Future<void> fetchCategories() async {

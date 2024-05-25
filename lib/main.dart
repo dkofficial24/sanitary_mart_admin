@@ -18,9 +18,12 @@ import 'package:sanitary_mart_admin/dashboard/ui/dashboard_screen.dart';
 import 'package:sanitary_mart_admin/firebase_options.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/service/order_firebase_service.dart';
+import 'package:sanitary_mart_admin/payment/provider/payment_info_provider.dart';
 import 'package:sanitary_mart_admin/product/provider/product_provider.dart';
 import 'package:sanitary_mart_admin/product/service/product_service.dart';
 import 'package:sanitary_mart_admin/util/storage_helper.dart';
+
+import 'payment/service/payment_firebase_service.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +60,8 @@ class VendorAdminApp extends StatelessWidget {
     final brandFirebaseService = BrandFirebaseService();
     Get.put(OrderFirebaseService());
     Get.put(CustomerFirebaseService());
+    Get.put(PaymentFirebaseService());
+    Get.put(productFirebaseService);
     StorageHelper storageHelper = StorageHelper();
 
     final authProvider = AuthenticationProvider(
@@ -86,6 +91,9 @@ class VendorAdminApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => CustomerProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PaymentInfoProvider(),
         )
       ],
       child: Consumer<AuthenticationProvider>(
