@@ -102,19 +102,19 @@ pw.Document createPdfDocument(OrderModel order) {
             pw.Text('Date: ${_formatDate(order.createdAt)}',
                 style: const pw.TextStyle(fontSize: 16)),
             pw.SizedBox(height: 10),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                // pw.Text('Status:', style: const pw.TextStyle(fontSize: 16)),
-                pw.Text(
-                  '${order.orderStatus.name.capitalize}',
-                  style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      fontSize: 16,
-                      color: _getStatusColor(order.orderStatus)),
-                ),
-              ],
-            ),
+            // pw.Row(
+            //   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     // pw.Text('Status:', style: const pw.TextStyle(fontSize: 16)),
+            //     pw.Text(
+            //       '${order.orderStatus.name.capitalize}',
+            //       style: pw.TextStyle(
+            //           fontWeight: pw.FontWeight.bold,
+            //           fontSize: 16,
+            //           color: _getStatusColor(order.orderStatus)),
+            //     ),
+            //   ],
+            // ),
             pw.Divider(),
             pw.Text('Items:',
                 style:

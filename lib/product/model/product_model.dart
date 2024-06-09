@@ -4,7 +4,7 @@ class Product {
   String? id;
   String name;
   double price;
-  String image;
+  String? image;
   String description;
   double? discountPercentage;
   double? discountAmount;
@@ -21,7 +21,7 @@ class Product {
     required this.description,
     required this.categoryId,
     required this.brandId,
-    required this.image,
+     this.image,
     required this.stock,
     this.categoryName,
     this.discountAmount,
@@ -33,7 +33,7 @@ class Product {
       'id': id,
       'name': name,
       'price': price,
-      'image': image,
+      'image': image ?? '',
       'description': description,
       'discountAmount': discountAmount,
       'categoryId': categoryId,

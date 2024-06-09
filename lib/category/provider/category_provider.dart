@@ -49,6 +49,7 @@ class CategoryProvider extends ChangeNotifier {
     try {
       resetStates();
       imageUploading = true;
+      _error = null;
       notifyListeners();
       File file = await AppUtil.compressImage(File(imagePath));
       String imageUrl = await firebaseService.uploadCategoryImage(file.path);
@@ -73,6 +74,7 @@ class CategoryProvider extends ChangeNotifier {
   Future<void> fetchCategories() async {
     try {
       resetStates();
+      _error = null;
       _state = ProviderState.loading;
       notifyListeners();
       _categoryList = await firebaseService.getCategories();
@@ -90,6 +92,7 @@ class CategoryProvider extends ChangeNotifier {
   Future<void> updateCategory(Category item) async {
     try {
       resetStates();
+      _error = null;
       _state = ProviderState.loading;
       notifyListeners();
 
@@ -112,6 +115,7 @@ class CategoryProvider extends ChangeNotifier {
   Future<void> deleteCategory(String id) async {
     try {
       resetStates();
+      _error = null;
       _state = ProviderState.loading;
       notifyListeners();
 
@@ -131,6 +135,7 @@ class CategoryProvider extends ChangeNotifier {
   Future<Category?> fetchCategoryById(String categoryId) async {
     try {
       resetStates();
+      _error = null;
       _state = ProviderState.loading;
       notifyListeners();
       Category? category = await firebaseService.fetchCategoryById(categoryId);

@@ -47,7 +47,7 @@ class _OrderCardState extends State<OrderCard> {
                 const Text(
                   'Shri Balaji Sanitary & Elec.',
                   style: TextStyle(
-                    fontSize: 18.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -61,13 +61,13 @@ class _OrderCardState extends State<OrderCard> {
             const Text(
               'Bhiwani Road, Bahal',
               style: TextStyle(
-                fontSize: 16.0,
+                fontSize: 14.0,
               ),
             ),
             const Text(
               'Phone: 9555294879',
               style: TextStyle(
-                fontSize: 16.0,
+                fontSize: 14.0,
               ),
             ),
             const SizedBox(height: 10),
@@ -76,7 +76,7 @@ class _OrderCardState extends State<OrderCard> {
                 Text(
                   'Order ID: ${widget.order.orderId}',
                   style: const TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -88,7 +88,7 @@ class _OrderCardState extends State<OrderCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Status:', style: TextStyle(fontSize: 16.0)),
+                const Text('Status:', style: TextStyle(fontSize: 14.0)),
                 SizedBox(
                   width: MediaQuery.of(context).size.width*0.5,
                   child: CustomAutoCompleteWidget<String>(
@@ -154,10 +154,10 @@ class _OrderCardState extends State<OrderCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('SubTotal:', style: TextStyle(fontSize: 16.0)),
+                      const Text('SubTotal:', style: TextStyle(fontSize: 14.0)),
                       Text(
                         total.toStringAsFixed(2),
-                        style: const TextStyle(fontSize: 16.0),
+                        style: const TextStyle(fontSize: 14.0),
                       ),
                     ],
                   ),
@@ -168,14 +168,14 @@ class _OrderCardState extends State<OrderCard> {
                         const Text(
                           'Points:',
                           style: TextStyle(
-                            fontSize: 16.0,
+                            fontSize: 14.0,
                             color: Colors.green,
                           ),
                         ),
                         Text(
                           (discount / 10).toStringAsFixed(2),
                           style: const TextStyle(
-                            fontSize: 16.0,
+                            fontSize: 14.0,
                             color: Colors.green,
                           ),
                         ),

@@ -2,7 +2,7 @@ class Customer {
   String uId;
   String userName;
   String email;
-  String phone;
+  String? phone;
   String userDeviceToken;
   bool? isAdmin;
   bool? isActive;
@@ -13,7 +13,7 @@ class Customer {
       {required this.uId,
       required this.userName,
       required this.email,
-      required this.phone,
+        this.phone,
       required this.userDeviceToken,
       this.isAdmin = false,
       this.isActive,
@@ -24,7 +24,7 @@ class Customer {
         uId: json['uId'] as String,
         userName: json['userName'] as String,
         email: json['email'] as String,
-        phone: json['phone'] as String,
+        phone: json['phone'] as String?,
         userDeviceToken: json['userDeviceToken'] as String,
         isAdmin: json['isAdmin'] as bool?,
         isActive: json['isActive'] as bool?,
@@ -57,7 +57,7 @@ class Customer {
         uId: json['uId'] as String,
         userName: json['userName'] as String,
         email: json['email'] as String,
-        phone: json['phone'] as String,
+        phone: json['phone'] as String?,
         userDeviceToken: json['userDeviceToken'] as String,
         isActive: json['isActive'] as bool,
         createdOn: DateTime.parse(json['createdOn'] as String),

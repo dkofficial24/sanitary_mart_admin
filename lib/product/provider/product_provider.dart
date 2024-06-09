@@ -7,7 +7,6 @@ import 'package:sanitary_mart_admin/brand/model/brand_model.dart';
 import 'package:sanitary_mart_admin/brand/service/brand_firebase_service.dart';
 import 'package:sanitary_mart_admin/category/model/category_model.dart';
 import 'package:sanitary_mart_admin/category/service/category_firebase_service.dart';
-import 'package:sanitary_mart_admin/core/app_util.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/product/model/product_model.dart';
 import 'package:sanitary_mart_admin/product/service/product_service.dart';
@@ -44,10 +43,13 @@ class ProductProvider extends ChangeNotifier {
       notifyListeners();
 
       ///compress file size
-      File file = await AppUtil.compressImage(File(product.image));
-      String path = await productService.uploadImage(file.path);
-      product.image = path;
-      await productService.addProduct(product);
+      if (product.image != null) {
+        File file = await AppUtil.compressImage(File(product.image!));
+        String path = await productService.uploadImage(file.path);
+        product.image = path;
+      }
+      String id = await productService.addProduct(product);
+      product.id = id;
       await addCategoryBrandAssociation(product.categoryId, product.brandId);
       products.add(product);
       AppUtil.showToast('Product added successfully!');
@@ -128,6 +130,7 @@ class ProductProvider extends ChangeNotifier {
   Future<void> deleteProduct(String id) async {
     try {
       isLoading = true;
+      error = false;
       state = ProviderState.loading;
       notifyListeners();
 
@@ -152,6 +155,7 @@ class ProductProvider extends ChangeNotifier {
   Future updateProduct(Product product) async {
     try {
       isLoading = true;
+      error = false;
       state = ProviderState.loading;
       notifyListeners();
       await productService.updateProduct(product);
@@ -172,10 +176,11 @@ class ProductProvider extends ChangeNotifier {
   Future<void> fetchAllProducts(String categoryId, String brandId) async {
     try {
       state = ProviderState.loading;
+      error = false;
       products.clear();
       notifyListeners();
-      products =
-      await productService.fetchProductsByCategoryBrand(categoryId, brandId);
+      products = await productService.fetchProductsByCategoryBrand(
+          categoryId, brandId);
       state = ProviderState.idle;
     } catch (e) {
       state = ProviderState.error;

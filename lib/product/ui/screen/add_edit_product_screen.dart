@@ -26,9 +26,9 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController percentDiscountController = TextEditingController();
+  final TextEditingController percentDiscountController = TextEditingController(text: '0');
   final TextEditingController stockQuantityController = TextEditingController();
-  final TextEditingController discountAmountController = TextEditingController();
+  final TextEditingController discountAmountController = TextEditingController(text: '0');
   File? _image;
 
   DiscountType? _discountType = DiscountType
@@ -129,7 +129,8 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
         categoryProvider.state == ProviderState.loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (productProvider.error ||
+    if (
+    productProvider.error ||
         brandProvider.state == ProviderState.error ||
         categoryProvider.state == ProviderState.error) {
       return ErrorRetryWidget(
@@ -383,8 +384,8 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
 
   void _addEditProduct(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      if (isImageAvailable()) {
-        final String name = nameController.text;
+     // if (isImageAvailable()) {
+      final String name = nameController.text;
         final double price = double.parse(priceController.text);
         final String description = descriptionController.text;
 
@@ -405,16 +406,16 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
           }
 
           final Product newProduct = Product(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: name,
-            price: price,
-            description: description,
-            discountAmount: discountAmount,
-            stock: int.parse(stockQuantityController.text),
-            categoryId: selectedCategory!.id!,
-            brandId: selectedBrand!.id!,
-            image: _image!.path,
-          );
+             id: widget.initialProduct?.id,
+          name: name,
+          price: price,
+          description: description,
+          discountAmount: discountAmount,
+          stock: int.parse(stockQuantityController.text),
+          categoryId: selectedCategory!.id!,
+          brandId: selectedBrand!.id!,
+          image: _image?.path,
+        );
           final provider = getProductProvider(context);
           if (isEditing) {
             provider.updateProduct(newProduct);
@@ -424,11 +425,12 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
         } else {
           AppUtil.showToast('Product brand or category is missing');
         }
-      } else {
-        AppUtil.showToast('Product image is not selected');
-      }
     }
+    // else {
+    //   AppUtil.showToast('Product image is not selected');
+    // }
   }
+
 
   bool isImageAvailable() {
     //todo

@@ -11,10 +11,12 @@ import 'package:sanitary_mart_admin/product/ui/screen/product_detail_screen.dart
 class ProductListViewItemWidget extends StatelessWidget {
   const ProductListViewItemWidget({
     required this.product,
+    required this.onPressed,
     Key? key,
   }) : super(key: key);
 
   final Product product;
+  final SlidableActionCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +34,7 @@ class ProductListViewItemWidget extends StatelessWidget {
             label: 'Delete',
           ),
           SlidableAction(
-            onPressed: (context) {
-              Get.to(AddEditProductScreen(
-                initialProduct: product,
-              ));
-            },
+            onPressed: onPressed,
             backgroundColor: Colors.grey,
             foregroundColor: Colors.white,
             icon: Icons.edit,
@@ -59,7 +57,7 @@ class ProductListViewItemWidget extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
             child: NetworkImageWidget(
-              product.image,
+              product.image??'',
             ),
           ),
         ),
@@ -84,6 +82,7 @@ class ProductListViewItemWidget extends StatelessWidget {
     );
   }
 
+
   void deleteProductDialog(BuildContext context, Product product) {
     showDialog(
       context: context,
@@ -107,6 +106,8 @@ class ProductListViewItemWidget extends StatelessWidget {
       ),
     );
   }
+
+
 
   Future<void> deleteProduct(BuildContext context, Product product) async {
     await Provider.of<ProductProvider>(context, listen: false)

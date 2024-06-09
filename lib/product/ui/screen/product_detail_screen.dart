@@ -51,7 +51,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 height: Get.width - 32,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: NetworkImageWidget(widget.product.image),
+                  child: NetworkImageWidget(widget.product.image ?? ''),
                 ),
               ),
             ),
@@ -70,7 +70,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 10.0),
                   // Display discounted price if available
-                  if (widget.product.discountAmount != null) ...[
+                  if (widget.product.discountAmount != null &&
+                      widget.product.discountAmount != 0) ...[
                     Row(
                       children: [
                         Text(
@@ -83,7 +84,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ),
                         const SizedBox(width: 10.0),
-                        if (widget.product.discountPercentage != null)
+                        if (widget.product.discountPercentage != null &&
+                            widget.product.discountPercentage != 0)
                           Text(
                             // Display discounted price with larger font
                             '₹${(widget.product.price * (1 - widget.product.discountPercentage! / 100)).toStringAsFixed(2)}',

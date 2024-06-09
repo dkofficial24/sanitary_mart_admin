@@ -48,6 +48,7 @@ class BrandProvider extends ChangeNotifier {
     }
   }
 
+  //todo move it to service
   Future<void> addCategoryBrandAssociation(
       String categoryId, String brandId) async {
     final CollectionReference association =
@@ -88,9 +89,9 @@ class BrandProvider extends ChangeNotifier {
 
   Future<void> fetchBrands() async {
     try {
+      _error = null;
       _state = ProviderState.loading;
       notifyListeners();
-
       _brandList = await firebaseService.getBrands();
       _state = ProviderState.idle;
       FirebaseAnalytics.instance.logEvent(name: 'fetch_brands');
@@ -187,6 +188,7 @@ class BrandProvider extends ChangeNotifier {
 
   Future<void> getBrandsByCategory(String categoryId) async {
     try {
+      _error = null;
       _state = ProviderState.loading;
       _brandList.clear();
       notifyListeners();
