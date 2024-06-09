@@ -107,43 +107,46 @@ class _OrderCardState extends State<OrderCard> {
             ),
             const SizedBox(height: 10),
             const Divider(),
-            DataTable(
-              dataRowMinHeight: 10,
-              dataRowMaxHeight: 65,
-              columns: const [
-                // DataColumn(label: Text('Sr')),
-                DataColumn(label: SizedBox(child: Text('Items'))),
-                DataColumn(
-                  label: Text('Qty'),
-                ),
-                DataColumn(
-                  label: Text('Price'),
-                ),
-                DataColumn(
-                  label: Text('Total'),
-                ),
-              ],
-              rows: widget.order.orderItems.map((item) {
-                double itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                discount += item.discountAmount * item.quantity;
-                return DataRow(
-                  cells: [
-                    // DataCell(Text(
-                    //   (widget.order.orderItems.indexOf(item) + 1).toString(),
-                    // )),
-                    DataCell(
-                      SizedBox(
-                        child: Text(item.productName),
-                        // width: 100,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                dataRowMinHeight: 10,
+                dataRowMaxHeight: 65,
+                columns: const [
+                  // DataColumn(label: Text('Sr')),
+                  DataColumn(label: SizedBox(child: Text('Items'))),
+                  DataColumn(
+                    label: Text('Qty'),
+                  ),
+                  DataColumn(
+                    label: Text('Price'),
+                  ),
+                  DataColumn(
+                    label: Text('Total'),
+                  ),
+                ],
+                rows: widget.order.orderItems.map((item) {
+                  double itemTotal = item.price * item.quantity;
+                  total += itemTotal;
+                  discount += item.discountAmount * item.quantity;
+                  return DataRow(
+                    cells: [
+                      // DataCell(Text(
+                      //   (widget.order.orderItems.indexOf(item) + 1).toString(),
+                      // )),
+                      DataCell(
+                        SizedBox(
+                          child: Text(item.productName),
+                          // width: 100,
+                        ),
                       ),
-                    ),
-                    DataCell(Text(item.quantity.toString())),
-                    DataCell(Text((item.price).toStringAsFixed(2))),
-                    DataCell(Text((itemTotal.toStringAsFixed(2)))),
-                  ],
-                );
-              }).toList(),
+                      DataCell(Text(item.quantity.toString())),
+                      DataCell(Text((item.price).toStringAsFixed(2))),
+                      DataCell(Text((itemTotal.toStringAsFixed(2)))),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
             const Divider(),
             // Summary Section
