@@ -21,8 +21,8 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   OrderStatus? filterStatus;
-
   List<OrderModel> filteredOrders = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +31,47 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       Provider.of<OrderProvider>(context, listen: false).loadOrders();
     });
+
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    searchOrders(_searchController.text);
+  }
+
+  void searchOrders(String query) {
+    if (query.isEmpty) {
+      filteredOrders = widget.orders;
+    } else {
+      filteredOrders = widget.orders
+          .where((order) => order.orderId.contains(query))
+          .toList();
+    }
+    setState(() {});
+  }
+
+  void filterOrderByStatus(OrderStatus? orderStatus) {
+    if (orderStatus == null) {
+      resetFilter();
+      return;
+    }
+    filteredOrders = widget.orders
+        .where((order) => order.orderStatus == orderStatus)
+        .toList();
+    setState(() {});
+  }
+
+  void resetFilter() {
+    filterStatus = null;
+    filteredOrders = widget.orders;
+    setState(() {});
   }
 
   @override
@@ -39,38 +80,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       appBar: CustomAppBar(
         title: 'Orders',
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return OrderFilterBottomSheet(
-                          (orderStatus) {
-                            filterStatus = orderStatus;
+          SizedBox(
+            width: MediaQuery.of(context).size.width*0.7,
+            child: TextField(
+              controller: _searchController,
 
-                            filterOrderByStatus(filterStatus);
-                          },
-                          selectedOrderStatus: filterStatus,
-                        );
-                      },
-                    );
-                  },
-                  icon: const Icon(Icons.filter_alt)),
-              if (filterStatus != null)
-                const Positioned(
-                  right: 12,
-                  child: Text(
-                    '.',
-                    style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 32),
-                  ),
-                )
-            ],
-          )
+              decoration: const InputDecoration(
+                hintText: 'Search by Order ID',
+                suffixIcon: Icon(Icons.search,color: Colors.white,),
+                hintStyle: TextStyle(color: Colors.white),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return OrderFilterBottomSheet(
+                        (orderStatus) {
+                      filterStatus = orderStatus;
+                      filterOrderByStatus(filterStatus);
+                    },
+                    selectedOrderStatus: filterStatus,
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.filter_alt),
+          ),
         ],
       ),
       body: Consumer<OrderProvider>(
@@ -89,8 +128,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                   if (filterStatus != null)
                     TextButton(
-                        onPressed: resetFilter,
-                        child: const Text('Reset Filter'))
+                      onPressed: resetFilter,
+                      child: const Text('Reset Filter'),
+                    )
                 ],
               ),
             );
@@ -125,22 +165,5 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         },
       ),
     );
-  }
-
-  void filterOrderByStatus(OrderStatus? orderStatus) {
-    if (orderStatus == null) {
-      resetFilter();
-      return;
-    }
-    filteredOrders = widget.orders
-        .where((element) => element.orderStatus == orderStatus)
-        .toList();
-    setState(() {});
-  }
-
-  void resetFilter() {
-    filterStatus = null;
-    filteredOrders = widget.orders;
-    setState(() {});
   }
 }
