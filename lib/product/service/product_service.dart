@@ -26,6 +26,12 @@ class ProductService extends BaseService {
     return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
   }
 
+  Future<List<Product>> fetchAllProducts() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection(collectionName).get();
+    return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
+  }
+
   Future<String> uploadProductImage(String path) async {
     return await uploadImage(path);
   }

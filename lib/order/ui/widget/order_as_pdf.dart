@@ -98,27 +98,22 @@ pw.Document createPdfDocument(OrderModel order) {
             pw.SizedBox(height: 10),
             pw.Text('Order ID: ${order.orderId}',
                 style:
-                    pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
             pw.Text('Date: ${_formatDate(order.createdAt)}',
                 style: const pw.TextStyle(fontSize: 16)),
-            pw.SizedBox(height: 10),
-            // pw.Row(
-            //   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     // pw.Text('Status:', style: const pw.TextStyle(fontSize: 16)),
-            //     pw.Text(
-            //       '${order.orderStatus.name.capitalize}',
-            //       style: pw.TextStyle(
-            //           fontWeight: pw.FontWeight.bold,
-            //           fontSize: 16,
-            //           color: _getStatusColor(order.orderStatus)),
-            //     ),
-            //   ],
-            // ),
-            pw.Divider(),
+            pw.Divider(), // Divider after order details
+            pw.Text('Customer Details:', // Customer details section
+                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            pw.Text('Name: ${order.customer?.userName ?? "Unavailable"}',
+                style: const pw.TextStyle(fontSize: 16)),
+            pw.Text('Address: ${order.customer?.address ?? "Unavailable"}',
+                style: const pw.TextStyle(fontSize: 16)),
+            pw.Text('Phone: ${order.customer?.phone ?? "Unavailable"}',
+                style: const pw.TextStyle(fontSize: 16)),
+            pw.Divider(), // Divider after customer details
             pw.Text('Items:',
                 style:
-                    pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
             pw.Table.fromTextArray(
               headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
               headers: ['Sr', 'Items', 'Qty', 'Price','Total'],
@@ -134,7 +129,7 @@ pw.Document createPdfDocument(OrderModel order) {
                 ];
               }).toList(),
             ),
-            pw.Divider(),
+            pw.Divider(), // Divider after order items
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
@@ -170,6 +165,7 @@ pw.Document createPdfDocument(OrderModel order) {
   );
   return pdf;
 }
+
 
 String _formatDate(int? timestamp) {
   if (timestamp == null) return 'Unknown date';

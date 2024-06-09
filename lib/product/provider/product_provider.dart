@@ -173,14 +173,13 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchAllProducts(String categoryId, String brandId) async {
+  Future<void> fetchAllProducts() async {
     try {
       state = ProviderState.loading;
       error = false;
       products.clear();
       notifyListeners();
-      products = await productService.fetchProductsByCategoryBrand(
-          categoryId, brandId);
+      products = await productService.fetchAllProducts();
       state = ProviderState.idle;
     } catch (e) {
       state = ProviderState.error;

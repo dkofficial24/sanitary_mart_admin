@@ -70,7 +70,35 @@ class _OrderCardState extends State<OrderCard> {
                 fontSize: 14.0,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
+            const Divider(),
+            const SizedBox(height: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Customer Details',
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
+                ),
+                rowItem(
+                  'Name:',
+                  widget.order.customer?.userName ?? 'Unavailable',
+                ),
+                rowItem(
+                  'Address:',
+                  widget.order.customer?.address ?? 'Unavailable',
+                ),
+                rowItem(
+                  'Phone:',
+                  (widget.order.customer?.phone != null &&
+                          widget.order.customer?.phone != 'null')
+                      ? widget.order.customer?.phone ?? 'Unavailable'
+                      : 'Unavailable',
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 4),
             Row(
               children: [
                 Text(
@@ -224,6 +252,24 @@ class _OrderCardState extends State<OrderCard> {
     // if(orderProvider.state != ProviderState.error && mounted) {
     //   orderProvider.loadOrders();
     // }
+  }
+
+  Widget rowItem(String label, String value) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14.0,
+          ),
+        ),
+      ],
+    );
   }
 
   String _formatDate(int? timestamp) {

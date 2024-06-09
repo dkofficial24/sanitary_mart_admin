@@ -8,6 +8,7 @@ import 'package:sanitary_mart_admin/customer/ui/customer_screen.dart';
 import 'package:sanitary_mart_admin/order/ui/order_screen.dart';
 import 'package:sanitary_mart_admin/payment/ui/payment_info_screen.dart';
 import 'package:sanitary_mart_admin/product/ui/screen/product_list_screen.dart';
+import 'package:sanitary_mart_admin/product/ui/stock_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -71,6 +72,16 @@ class DashboardScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const CategoryScreen(),
+                    ),
+                  ),
+                ),_buildMenuItem(
+                  context,
+                  title: 'Stock',
+                  icon: Icons.dataset,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProductStockScreen(),
                     ),
                   ),
                 ),

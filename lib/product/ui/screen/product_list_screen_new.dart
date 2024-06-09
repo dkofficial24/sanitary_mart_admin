@@ -31,13 +31,13 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
   @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      fetchAllProducts();
+      fetchProductsByCategoryBrand();
     });
     super.initState();
   }
 
-  void fetchAllProducts() {
-    Provider.of<ProductProvider>(context, listen: false).fetchAllProducts(
+  void fetchProductsByCategoryBrand() {
+    Provider.of<ProductProvider>(context, listen: false).fetchProductsByCategoryBrand(
       widget.categoryId,
       widget.brandId,
     );
@@ -64,7 +64,7 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
             } else if (provider.state == ProviderState.error) {
               return ErrorRetryWidget(
                 onRetry: () {
-                  fetchAllProducts();
+                  fetchProductsByCategoryBrand();
                 },
               );
             }
@@ -86,7 +86,7 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
                     await Get.to(AddEditProductScreen(
                       initialProduct: product,
                     ));
-                    fetchAllProducts();
+                    fetchProductsByCategoryBrand();
                   },
                 );
               },
