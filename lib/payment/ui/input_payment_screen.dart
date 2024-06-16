@@ -118,15 +118,15 @@ class _InputPaymentScreenState extends State<InputPaymentScreen> {
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          if (file == null) {
-                            Get.snackbar(
-                                'Error', 'Please select a QR code image');
-                            return;
+                          if (widget.paymentInfo != null) {
+                            updatePaymentInfo(context);
+                          } else {
+                            addPaymentInfo(context);
                           }
-                          addPaymentInfo(context);
                         }
                       },
-                      child: const Text('Submit'),
+                      child: Text(
+                          widget.paymentInfo != null ? 'Update' : 'Submit'),
                     ),
                   ],
                 ),
@@ -138,13 +138,38 @@ class _InputPaymentScreenState extends State<InputPaymentScreen> {
     );
   }
 
-  void addPaymentInfo(BuildContext context) {
-    Provider.of<PaymentInfoProvider>(context, listen: false)
-        .addPaymentInfo(PaymentInfo(
-      upiId: upiIdController.text,
-      accountHolderName: ownerNameController.text,
-      qrCodeUrl: file!.path,
-    ));
+  Future addPaymentInfo(BuildContext context) async {
+    if (file == null) {
+      Get.snackbar('Error', 'Please select a QR code image');
+      return;
+    } else {
+      final provider = Provider.of<PaymentInfoProvider>(context, listen: false);
+      String? imgUrl = await provider.uploadQRCode(file!.path);
+      if (imgUrl != null) {
+        provider.addPaymentInfo(PaymentInfo(
+            upiId: upiIdController.text,
+            accountHolderName: ownerNameController.text,
+            qrCodeUrl: imgUrl));
+      }
+    }
+  }
+
+  Future updatePaymentInfo(BuildContext context) async {
+    String? imgUrl;
+    final provider = Provider.of<PaymentInfoProvider>(context, listen: false);
+    if (file != null) {
+      imgUrl = await provider.uploadQRCode(file!.path);
+    } else {
+      imgUrl = widget.paymentInfo!.qrCodeUrl;
+    }
+    if (imgUrl != null) {
+      provider.updatePaymentInfo(PaymentInfo(
+        id: widget.paymentInfo!.id!,
+        upiId: upiIdController.text,
+        accountHolderName: ownerNameController.text,
+        qrCodeUrl: imgUrl,
+      ));
+    }
   }
 
   Widget buildQrWidget(PaymentInfoProvider provider) {
@@ -158,7 +183,7 @@ class _InputPaymentScreenState extends State<InputPaymentScreen> {
       );
     } else {
       return NetworkImageWidget(
-        provider.paymentInfo?.qrCodeUrl ?? '',
+        widget.paymentInfo?.qrCodeUrl ?? '',
         imgHeight: Get.height * 0.4,
       );
     }

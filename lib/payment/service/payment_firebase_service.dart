@@ -5,25 +5,19 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:sanitary_mart_admin/payment/model/account_info_model.dart';
 
 class PaymentFirebaseService {
-  final String collectionName = 'payment_info';
+  final String collectionName = 'payment_details';
 
-  Future<PaymentInfo?> fetchPaymentInfo() async {
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .collection(collectionName)
-        .doc('payment_info_id')
-        .get();
-    if (documentSnapshot.exists) {
-      return PaymentInfo.fromFirebase(documentSnapshot);
-    }else{
-      return null;
-    }
+  Future<List<PaymentInfo>> fetchPaymentInfo() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection(collectionName).get();
+    return snapshot.docs.map((doc) => PaymentInfo.fromFirebase(doc)).toList();
     throw 'Payment info not available';
   }
 
   Future<void> updatePaymentInfo(PaymentInfo accountInfo) async {
     await FirebaseFirestore.instance
         .collection(collectionName)
-        .doc('payment_info_id')
+        .doc(accountInfo.id)
         .update(accountInfo.toJson());
   }
 
@@ -37,8 +31,16 @@ class PaymentFirebaseService {
   }
 
   Future<void> addPaymentInfo(PaymentInfo accountInfo) async {
+    final paymentRef = FirebaseFirestore.instance.collection(collectionName);
+    final id = paymentRef.doc().id;
+    accountInfo.id = id;
+    await paymentRef.doc(id).set(accountInfo.toJson());
+  }
+
+  Future<void> deletePaymentInfo(String id) async {
     await FirebaseFirestore.instance
         .collection(collectionName)
-        .doc('payment_info_id').set(accountInfo.toJson());
+        .doc(id)
+        .delete();
   }
 }

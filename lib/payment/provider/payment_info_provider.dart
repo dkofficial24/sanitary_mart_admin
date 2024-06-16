@@ -7,7 +7,7 @@ import 'package:sanitary_mart_admin/payment/model/account_info_model.dart';
 import 'package:sanitary_mart_admin/payment/service/payment_firebase_service.dart';
 
 class PaymentInfoProvider extends ChangeNotifier {
-  PaymentInfo? paymentInfo;
+  List<PaymentInfo> paymentInfoList = [];
   ProviderState providerState = ProviderState.idle;
   bool isUploading = false;
 
@@ -16,7 +16,7 @@ class PaymentInfoProvider extends ChangeNotifier {
       providerState = ProviderState.loading;
       notifyListeners();
       PaymentFirebaseService adminService = Get.find<PaymentFirebaseService>();
-      paymentInfo = await adminService.fetchPaymentInfo();
+      paymentInfoList = await adminService.fetchPaymentInfo();
       providerState = ProviderState.idle;
       notifyListeners();
     } catch (e) {
@@ -30,8 +30,9 @@ class PaymentInfoProvider extends ChangeNotifier {
       providerState = ProviderState.loading;
       notifyListeners();
       PaymentFirebaseService adminService = Get.find<PaymentFirebaseService>();
-      adminService.updatePaymentInfo(paymentInfo);
+      await adminService.updatePaymentInfo(paymentInfo);
       providerState = ProviderState.idle;
+      AppUtil.showToast('Payment details updated');
       notifyListeners();
     } catch (e) {
       providerState = ProviderState.error;
@@ -45,10 +46,6 @@ class PaymentInfoProvider extends ChangeNotifier {
       providerState = ProviderState.loading;
       notifyListeners();
       PaymentFirebaseService adminService = Get.find<PaymentFirebaseService>();
-      String? url = await uploadQRCode(paymentInfo.qrCodeUrl);
-      if (url != null) {
-        paymentInfo.qrCodeUrl = url;
-      }
       adminService.addPaymentInfo(paymentInfo);
       providerState = ProviderState.idle;
       notifyListeners();
@@ -78,6 +75,21 @@ class PaymentInfoProvider extends ChangeNotifier {
       providerState = ProviderState.error;
       AppUtil.showToast('Failed to upload QRCode Image');
       return null;
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future deletePaymentInfo(String id) async {
+    try {
+      providerState = ProviderState.loading;
+      notifyListeners();
+      PaymentFirebaseService adminService = Get.find<PaymentFirebaseService>();
+      await adminService.deletePaymentInfo(id);
+    } catch (e) {
+      isUploading = false;
+      providerState = ProviderState.error;
+      AppUtil.showToast('Failed to upload QRCode Image');
     } finally {
       notifyListeners();
     }
