@@ -10,6 +10,7 @@ class OrderModel {
   OrderStatus orderStatus;
   Customer? customer;
   bool userVerified;
+  String? note;
 
   OrderModel({
     required this.orderId,
@@ -18,7 +19,8 @@ class OrderModel {
     this.orderStatus = OrderStatus.pending,
     this.createdAt,
     this.updatedAt,
-    this.userVerified=false,
+    this.userVerified = false,
+    this.note,
   });
 
   // Convert OrderModel instance to Map for serialization
@@ -28,8 +30,9 @@ class OrderModel {
       'orderItems': orderItems.map((item) => item.toJson()).toList(),
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'orderStatus': orderStatus,
+      'orderStatus': orderStatus.name,
       'userVerified': userVerified,
+      'note': note,
     };
   }
 
@@ -37,16 +40,17 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     var list = json['orderItems'] as List;
     List<OrderItem> orderItemsList =
-        list.map((i) => OrderItem.fromJson(i)).toList();
+    list.map((i) => OrderItem.fromJson(i)).toList();
     return OrderModel(
       orderId: json['orderId'],
       orderItems: orderItemsList,
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
-      userVerified: json['userVerified'] ??false,
+      userVerified: json['userVerified'] ?? false,
       orderStatus: parseOrderStatus(json['orderStatus']),
+      note: json['note'],
       customer:
-          json['customer'] != null ? Customer.fromJson(json['customer']) : null,
+      json['customer'] != null ? Customer.fromJson(json['customer']) : null,
     );
   }
 }

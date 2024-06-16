@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/widget/copy_button_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/custom_auto_complete_widget.dart';
@@ -13,8 +13,10 @@ import 'package:sanitary_mart_admin/product/service/product_service.dart';
 class OrderCard extends StatefulWidget {
   const OrderCard({
     required this.order,
-    super.key});
-   final OrderModel order;
+    Key? key,
+  }) : super(key: key);
+
+  final OrderModel order;
 
   @override
   State<OrderCard> createState() => _OrderCardState();
@@ -23,6 +25,7 @@ class OrderCard extends StatefulWidget {
 class _OrderCardState extends State<OrderCard> {
   OrderStatus? selectedOrderStatus;
   OrderStatus? prevOrderStatus;
+  bool isShowingNote = false; // Track whether note bottom sheet is open
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _OrderCardState extends State<OrderCard> {
   Widget build(BuildContext context) {
     double total = 0;
     double discount = 0;
+
     return Card(
       margin: const EdgeInsets.all(10.0),
       child: Padding(
@@ -51,11 +55,30 @@ class _OrderCardState extends State<OrderCard> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(onPressed: (){
-                  shareOrderAsPdf(context,widget.order);
-                }, icon: const Icon(Icons.share)) ,IconButton(onPressed: (){
-                  downloadOrderAsPdf(context,widget.order);
-                }, icon: const Icon(Icons.download))
+                Row(
+                  children: [
+                    if (widget.order.note != null &&
+                        widget.order.note!.isNotEmpty)
+                      IconButton(
+                        onPressed: () {
+                          _showNoteDetails(context);
+                        },
+                        icon: const Icon(Icons.note_alt_outlined),
+                      ),
+                    IconButton(
+                      onPressed: () {
+                        shareOrderAsPdf(context, widget.order);
+                      },
+                      icon: const Icon(Icons.share),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        downloadOrderAsPdf(context, widget.order);
+                      },
+                      icon: const Icon(Icons.download),
+                    ),
+                  ],
+                ),
               ],
             ),
             const Text(
@@ -78,7 +101,8 @@ class _OrderCardState extends State<OrderCard> {
               children: [
                 const Text(
                   'Customer Details',
-                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
+                  style:
+                  TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                 ),
                 rowItem(
                   'Name:',
@@ -91,7 +115,7 @@ class _OrderCardState extends State<OrderCard> {
                 rowItem(
                   'Phone:',
                   (widget.order.customer?.phone != null &&
-                          widget.order.customer?.phone != 'null')
+                      widget.order.customer?.phone != 'null')
                       ? widget.order.customer?.phone ?? 'Unavailable'
                       : 'Unavailable',
                 ),
@@ -108,7 +132,7 @@ class _OrderCardState extends State<OrderCard> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                CopyIconButton(widget.order.orderId)
+                CopyIconButton(widget.order.orderId),
               ],
             ),
             Text('Date: ${_formatDate(widget.order.createdAt)}'),
@@ -118,7 +142,7 @@ class _OrderCardState extends State<OrderCard> {
               children: [
                 const Text('Status:', style: TextStyle(fontSize: 14.0)),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width*0.5,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: CustomAutoCompleteWidget<String>(
                     label: '',
                     initailValue: selectedOrderStatus?.name.capitalizeFirst,
@@ -141,7 +165,6 @@ class _OrderCardState extends State<OrderCard> {
                 dataRowMinHeight: 10,
                 dataRowMaxHeight: 65,
                 columns: const [
-                  // DataColumn(label: Text('Sr')),
                   DataColumn(label: SizedBox(child: Text('Items'))),
                   DataColumn(
                     label: Text('Qty'),
@@ -159,13 +182,9 @@ class _OrderCardState extends State<OrderCard> {
                   discount += item.discountAmount * item.quantity;
                   return DataRow(
                     cells: [
-                      // DataCell(Text(
-                      //   (widget.order.orderItems.indexOf(item) + 1).toString(),
-                      // )),
                       DataCell(
                         SizedBox(
                           child: Text(item.productName),
-                          // width: 100,
                         ),
                       ),
                       DataCell(Text(item.quantity.toString())),
@@ -185,7 +204,8 @@ class _OrderCardState extends State<OrderCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('SubTotal:', style: TextStyle(fontSize: 14.0)),
+                      const Text('SubTotal:',
+                          style: TextStyle(fontSize: 14.0)),
                       Text(
                         total.toStringAsFixed(2),
                         style: const TextStyle(fontSize: 14.0),
@@ -215,13 +235,23 @@ class _OrderCardState extends State<OrderCard> {
                 ],
               ),
             ),
+            if (widget.order.note != null && widget.order.note!.isNotEmpty)
+              const SizedBox(height: 10),
+            if (widget.order.note != null && widget.order.note!.isNotEmpty)
+              TextButton(
+                onPressed: () {
+                  _showNoteDetails(context);
+                },
+                child: const Text('View Note'),
+              ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
 
-  Future onOrderUpdate(String orderStatus, BuildContext context)async {
+  Future<void> onOrderUpdate(String orderStatus, BuildContext context) async {
     setState(() {
       prevOrderStatus = selectedOrderStatus;
       selectedOrderStatus = parseOrderStatus(orderStatus);
@@ -248,10 +278,6 @@ class _OrderCardState extends State<OrderCard> {
         );
       }
     }
-
-    // if(orderProvider.state != ProviderState.error && mounted) {
-    //   orderProvider.loadOrders();
-    // }
   }
 
   Widget rowItem(String label, String value) {
@@ -278,20 +304,49 @@ class _OrderCardState extends State<OrderCard> {
     return DateFormat.yMMMd().format(date); // Example format: Jan 28, 2020
   }
 
-  Color getStatusColor(OrderStatus orderStatus) {
-    switch (orderStatus) {
-      case OrderStatus.pending:
-        return Colors.purple;
-      case OrderStatus.delivered:
-        return Colors.green;
-      case OrderStatus.canceled:
-        return Colors.red;
-      case OrderStatus.returned:
-        return Colors.orange;
-      default:
-        return Colors.black87;
-    }
+  void _showNoteDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.4,
+          width: MediaQuery.of(context).size.width,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Order Note',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Text(
+                    widget.order.note!,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
+
 }
-
-
