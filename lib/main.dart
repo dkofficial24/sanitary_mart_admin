@@ -16,6 +16,7 @@ import 'package:sanitary_mart_admin/customer/provider/customer_provider.dart';
 import 'package:sanitary_mart_admin/customer/service/customer_firebase_service.dart';
 import 'package:sanitary_mart_admin/dashboard/ui/dashboard_screen.dart';
 import 'package:sanitary_mart_admin/firebase_options.dart';
+import 'package:sanitary_mart_admin/incentive_points/service/incentive_provider_service.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/service/order_firebase_service.dart';
 import 'package:sanitary_mart_admin/payment/provider/payment_info_provider.dart';
@@ -61,6 +62,7 @@ class VendorAdminApp extends StatelessWidget {
     Get.put(OrderFirebaseService());
     Get.put(CustomerFirebaseService());
     Get.put(PaymentFirebaseService());
+    Get.put(IncentivePointService());
     Get.put(productFirebaseService);
     StorageHelper storageHelper = StorageHelper();
 

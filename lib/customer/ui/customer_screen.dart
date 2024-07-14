@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/customer/provider/customer_provider.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:sanitary_mart_admin/incentive_points/ui/incentive_point_provider.dart';
+import 'package:sanitary_mart_admin/incentive_points/ui/screen/incentive_point_screen.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({Key? key}) : super(key: key);
@@ -70,6 +73,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 child: ListTile(
                   title: Text(customer.userName),
                   subtitle: Text(customer.email),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Get.to(ChangeNotifierProvider(
+                        create: (BuildContext context) {
+                          return IncentivePointsProvider();
+                        },
+                        child: IncentivePointScreen(customer)));
+                  },
                   // Add more customer details as needed
                 ),
               );

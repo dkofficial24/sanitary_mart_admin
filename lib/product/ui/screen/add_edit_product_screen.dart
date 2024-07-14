@@ -124,7 +124,7 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     required BrandProvider brandProvider,
     required CategoryProvider categoryProvider,
   }) {
-    if (productProvider.isLoading ||
+    if (productProvider.state == ProviderState.loading ||
         brandProvider.state == ProviderState.loading ||
         categoryProvider.state == ProviderState.loading) {
       return const Center(child: CircularProgressIndicator());
