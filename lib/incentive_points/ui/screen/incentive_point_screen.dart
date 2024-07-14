@@ -33,11 +33,93 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
     incentiveProvider.fetchIncentivePointsHistory(widget.customer.uId);
   }
 
+  void showUpdatePointsBottomSheet(BuildContext context,
+      IncentivePointsProvider incentiveProvider, bool isIncrement) {
+    TextEditingController pointsController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: pointsController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'Enter Points'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    final points = double.tryParse(pointsController.text) ?? 0;
+                    if (points != 0) {
+                      if (isIncrement) {
+                        incrementPoint(incentiveProvider, points);
+                      } else {
+                        decrementPoint(incentiveProvider, points);
+                      }
+                    }
+                    Navigator.pop(context);
+                  },
+                  child: Text(isIncrement ? 'Add Points' : 'Reduce Point'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void incrementPoint(
+      IncentivePointsProvider incentiveProvider, double points) {
+    incentiveProvider.incrementIncentivePoints(widget.customer.uId, points);
+  }
+
+  void decrementPoint(
+      IncentivePointsProvider incentiveProvider, double points) {
+    if (points > incentiveProvider.totalPoints) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Cannot reduce more points than available'),
+      ));
+      return;
+    }
+    incentiveProvider.decrementIncentivePoints(widget.customer.uId, points);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Incentive Points History'),
+      appBar: CustomAppBar(
+        title: 'Incentive Points',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => showUpdatePointsBottomSheet(
+                context,
+                Provider.of<IncentivePointsProvider>(
+                  context,
+                  listen: false,
+                ),
+                true),
+          ),
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: () => showUpdatePointsBottomSheet(
+                context,
+                Provider.of<IncentivePointsProvider>(context, listen: false),
+                false),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -51,40 +133,23 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
                   );
                 }
 
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Total Points: ${incentiveProvider.totalPoints}',
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove),
-                              onPressed: () {
-                                updatePoints(incentiveProvider, -1);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () {
-                                updatePoints(incentiveProvider, 1);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total Points: ${incentiveProvider.totalPoints.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Divider(),
+            const SizedBox(height: 10),
             Expanded(
               child: Consumer<IncentivePointsProvider>(
                 builder: (context, incentiveProvider, child) {
@@ -116,7 +181,8 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today_outlined, size: 16.0),
+                                  const Icon(Icons.calendar_today_outlined,
+                                      size: 16.0),
                                   Text(
                                     ' Created: ${_formatDate(point.created!)}',
                                     style: const TextStyle(fontSize: 12.0),
@@ -129,9 +195,8 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
                                   Text(
                                     'Status: ',
                                     style: TextStyle(
-                                        color: point.redeemStatus == 'Redeemed'
-                                            ? Colors.green
-                                            : Colors.orange),
+                                        color: _getStatusColor(
+                                            point.redeemStatus)),
                                   ),
                                   SizedBox(
                                     width: MediaQuery.of(context).size.width * 0.5,
@@ -141,7 +206,8 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
                                       options: RedeemStatus.values
                                           .map((e) => e.name.toString())
                                           .toList(),
-                                      onSuggestionSelected: (String? redeemStatus) {
+                                      onSuggestionSelected:
+                                          (String? redeemStatus) {
                                         incentivePointStatusUpdate(
                                             redeemStatus, incentiveProvider, point);
                                       },
@@ -149,14 +215,10 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
                                   ),
                                   const SizedBox(width: 5.0),
                                   Icon(
-                                    point.redeemStatus == 'Redeemed'
-                                        ? Icons.check_circle_outline
-                                        : Icons.access_time_outlined,
+                                      getStatusIcon(point.redeemStatus),
                                     size: 16.0,
-                                    color: point.redeemStatus == 'Redeemed'
-                                        ? Colors.green
-                                        : Colors.orange,
-                                  ),
+                                      color:
+                                          _getStatusColor(point.redeemStatus)),
                                 ],
                               ),
                             ],
@@ -172,13 +234,6 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
         ),
       ),
     );
-  }
-
-  void updatePoints(IncentivePointsProvider incentiveProvider, int change) {
-    final newPoints = incentiveProvider.totalPoints + change;
-    if (newPoints >= 0) {
-      incentiveProvider.updateIncentivePoints(widget.customer.uId, change.toDouble());
-    }
   }
 
   void incentivePointStatusUpdate(
@@ -197,5 +252,31 @@ class _IncentivePointScreenState extends State<IncentivePointScreen> {
 
   String _formatDate(int millisecondsSinceEpoch) {
     return AppUtil.convertTimestampInDate(millisecondsSinceEpoch);
+  }
+
+  IconData getStatusIcon(RedeemStatus status) {
+    switch (status) {
+      case RedeemStatus.accepted:
+        return Icons.check_circle_outline;
+      case RedeemStatus.rejected:
+        return Icons.close_outlined;
+      case RedeemStatus.processing:
+        return Icons.access_time_outlined;
+      default:
+        return Icons.circle_outlined;
+    }
+  }
+
+  Color _getStatusColor(RedeemStatus status) {
+    switch (status) {
+      case RedeemStatus.accepted:
+        return Colors.green;
+      case RedeemStatus.processing:
+        return Colors.orange;
+      case RedeemStatus.rejected:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

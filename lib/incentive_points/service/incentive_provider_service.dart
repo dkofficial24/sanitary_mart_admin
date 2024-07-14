@@ -7,6 +7,7 @@ class IncentivePointService {
         .collection('incentive_points')
         .doc(uId)
         .collection('data')
+        .orderBy('updated', descending: true)
         .get();
     return querySnapshot.docs
         .map((doc) => IncentivePointInfo.fromDocument(doc))
@@ -27,19 +28,21 @@ class IncentivePointService {
     return 0.0;
   }
 
-  Future<void> updateIncentivePoints(String uId, double points) async {
+  Future<void> incrementIncentivePoints(String uId, double points) async {
     final docRef = FirebaseFirestore.instance
         .collection('incentive_points')
         .doc(uId);
-    final snapshot = await docRef.get();
-    num totalPoints = 0.0;
-    if (snapshot.exists) {
-      final map = snapshot.data();
-      if (map != null && map.containsKey('points')) {
-        totalPoints = map['points'];
-      }
-    }
+    num totalPoints = await getTotalIncentivePoints(uId);
     totalPoints += points;
+    await docRef.set({'points': totalPoints}, SetOptions(merge: true));
+  }
+
+  Future<void> decrementIncentivePoints(String uId, double points) async {
+    final docRef = FirebaseFirestore.instance
+        .collection('incentive_points')
+        .doc(uId);
+    num totalPoints = await getTotalIncentivePoints(uId);
+    totalPoints -= points;
     await docRef.set({'points': totalPoints}, SetOptions(merge: true));
   }
 

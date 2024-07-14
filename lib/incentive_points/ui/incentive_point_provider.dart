@@ -37,17 +37,34 @@ class IncentivePointsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateIncentivePoints(String uId, double points) async {
+  Future<void> incrementIncentivePoints(String uId, double points) async {
     try {
       providerState = ProviderState.loading;
       IncentivePointService incentivePointService = Get.find();
-      await incentivePointService.updateIncentivePoints(uId, points);
-      await fetchTotalIncentivePoints(uId);  // Update total points after change
+      await incentivePointService.incrementIncentivePoints(uId, points);
+      await fetchTotalIncentivePoints(uId);
+      notifyListeners();
+      providerState = ProviderState.idle;
+    } catch (e) {
+      providerState = ProviderState.error;
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> decrementIncentivePoints(String uId, double points) async {
+    try {
+      providerState = ProviderState.loading;
+      IncentivePointService incentivePointService = Get.find();
+      await incentivePointService.decrementIncentivePoints(uId, points);
+      await fetchTotalIncentivePoints(uId);
       notifyListeners();
       providerState = ProviderState.idle;
     } catch (e) {
       //todo show error msg
       providerState = ProviderState.error;
+    } finally {
+      notifyListeners();
     }
   }
 
@@ -70,3 +87,4 @@ class IncentivePointsProvider extends ChangeNotifier {
     }
   }
 }
+
