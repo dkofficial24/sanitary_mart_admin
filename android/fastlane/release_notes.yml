@@ -1,3 +1,7 @@
 release_note: "
-- Incentive points feature implemented
+- Customer detail screen
+- Fix: Error while add product
+- Fix: Error while edit product
+- Search bar in product stocks screen 
+- Order by ascending and descending product stocks
 "

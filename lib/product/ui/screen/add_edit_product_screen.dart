@@ -26,14 +26,15 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController percentDiscountController = TextEditingController(text: '0');
   final TextEditingController stockQuantityController = TextEditingController();
-  final TextEditingController discountAmountController = TextEditingController(text: '0');
+  final TextEditingController percentDiscountController =
+      TextEditingController(text: '0');
+  final TextEditingController discountAmountController =
+      TextEditingController(text: '0');
   File? _image;
 
-  DiscountType? _discountType = DiscountType
-      .percentage; // Default to percentage
-
+  DiscountType? _discountType =
+      DiscountType.percentage; // Default to percentage
 
   final picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
@@ -55,8 +56,15 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     nameController.text = product.name;
     priceController.text = product.price.toString();
     descriptionController.text = product.description;
-    percentDiscountController.text = product.discountPercentage.toString();
+
     stockQuantityController.text = product.stock.toString();
+    if (product.discountAmount != null) {
+      discountAmountController.text = product.discountAmount.toString();
+      _discountType = DiscountType.amount;
+    } else if (product.discountPercentage != null) {
+      _discountType = DiscountType.percentage;
+      percentDiscountController.text = product.discountPercentage.toString();
+    }
   }
 
   Future init() async {
@@ -129,8 +137,7 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
         categoryProvider.state == ProviderState.loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (
-    productProvider.error ||
+    if (productProvider.error ||
         brandProvider.state == ProviderState.error ||
         categoryProvider.state == ProviderState.error) {
       return ErrorRetryWidget(
@@ -384,53 +391,56 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
 
   void _addEditProduct(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-     // if (isImageAvailable()) {
+      // if (isImageAvailable()) {
       final String name = nameController.text;
-        final double price = double.parse(priceController.text);
-        final String description = descriptionController.text;
+      final double price = double.parse(priceController.text);
+      final String description = descriptionController.text;
 
-        if (selectedCategory != null && selectedBrand != null) {
-          double discountAmount = 0;
-          if (_discountType == DiscountType.amount) {
-            discountAmount =
-                double.tryParse(discountAmountController.text) ?? 0;
-          } else {
-            double percent =
-                double.tryParse(percentDiscountController.text) ?? 0;
-            discountAmount = (price * percent) / 100;
-          }
+      if (selectedCategory != null && selectedBrand != null) {
+        double discountAmount = 0;
+        double discountPercentage = 0;
+        if (_discountType == DiscountType.amount) {
+          discountAmount = double.tryParse(discountAmountController.text) ?? 0;
+        } else {
+          double percent = double.tryParse(percentDiscountController.text) ?? 0;
+          discountPercentage = percent;
+        }
 
-          if (discountAmount > price) {
-            AppUtil.showToast('Discount amount can not more than the price');
-            return;
-          }
+        if (discountAmount > price) {
+          AppUtil.showToast('Discount amount can not be more than the price');
+          return;
+        }
+        if (discountPercentage > 100) {
+          AppUtil.showToast('Discount percentage can not be more than 100%');
+          return;
+        }
 
-          final Product newProduct = Product(
-             id: widget.initialProduct?.id,
+        final Product newProduct = Product(
+          id: widget.initialProduct?.id,
           name: name,
           price: price,
           description: description,
           discountAmount: discountAmount,
+          discountPercentage: discountPercentage,
           stock: int.parse(stockQuantityController.text),
           categoryId: selectedCategory!.id!,
           brandId: selectedBrand!.id!,
           image: _image?.path,
         );
-          final provider = getProductProvider(context);
-          if (isEditing) {
-            provider.updateProduct(newProduct);
-          } else {
-            getProductProvider(context).addProduct(newProduct);
-          }
+        final provider = getProductProvider(context);
+        if (isEditing) {
+          provider.updateProduct(newProduct);
         } else {
-          AppUtil.showToast('Product brand or category is missing');
+          getProductProvider(context).addProduct(newProduct);
         }
+      } else {
+        AppUtil.showToast('Product brand or category is missing');
+      }
     }
     // else {
     //   AppUtil.showToast('Product image is not selected');
     // }
   }
-
 
   bool isImageAvailable() {
     //todo

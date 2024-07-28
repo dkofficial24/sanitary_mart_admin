@@ -13,7 +13,7 @@ class ShimmerGridListWidget extends StatelessWidget {
         mainAxisSpacing: 16.0,
         childAspectRatio: 1.0,
       ),
-      itemCount: 12, // Displaying 10-12 shimmer items
+      itemCount: 12, shrinkWrap: true,// Displaying 10-12 shimmer items
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
           baseColor: Colors.grey[300]!,

@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
 import 'package:sanitary_mart_admin/brand/model/brand_model.dart';
 import 'package:sanitary_mart_admin/brand/service/brand_firebase_service.dart';
 import 'package:sanitary_mart_admin/category/model/category_model.dart';
@@ -26,23 +26,50 @@ class ProductProvider extends ChangeNotifier {
   List<Category> categories = [];
   List<Brand> brands = [];
   ProviderState state = ProviderState.idle;
-
-  bool isLoading = false;
   bool error = false;
 
-  void clearProducts(){
+  String _searchQuery = '';
+  bool _isAscending = true;
+  Timer? _debounce;
+
+  String get searchQuery => _searchQuery;
+  bool get isAscending => _isAscending;
+
+  void updateSearchQuery(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 200), () {
+      _searchQuery = query;
+      notifyListeners();
+    });
+  }
+
+  void toggleSortOrder() {
+    _isAscending = !_isAscending;
+    notifyListeners();
+  }
+
+  List<Product> get filteredProducts {
+    var filteredProducts = products.where((product) {
+      return product.name.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    filteredProducts.sort((a, b) => _isAscending
+        ? a.stock.compareTo(b.stock)
+        : b.stock.compareTo(a.stock));
+
+    return filteredProducts;
+  }
+
+  void clearProducts() {
     products = [];
     notifyListeners();
   }
 
   Future<void> addProduct(Product product) async {
     try {
-      isLoading = true;
-      error = false;
       state = ProviderState.loading;
       notifyListeners();
 
-      ///compress file size
       if (product.image != null) {
         File file = await AppUtil.compressImage(File(product.image!));
         String path = await productService.uploadImage(file.path);
@@ -53,21 +80,22 @@ class ProductProvider extends ChangeNotifier {
       await addCategoryBrandAssociation(product.categoryId, product.brandId);
       products.add(product);
       AppUtil.showToast('Product added successfully!');
-      isLoading = false;
       state = ProviderState.idle;
-      notifyListeners();
       FirebaseAnalytics.instance.logEvent(name: 'product_added');
     } catch (e) {
       state = ProviderState.error;
+      error = true;
       FirebaseAnalytics.instance.logEvent(name: 'error_product_added');
-      AppUtil.showToast('Unable to add product.Error: $e');
+      AppUtil.showToast('Unable to add product. Error: $e');
+    } finally {
+      notifyListeners();
     }
   }
 
   Future<void> addCategoryBrandAssociation(
       String categoryId, String brandId) async {
     final CollectionReference association =
-        FirebaseFirestore.instance.collection('category_brand');
+    FirebaseFirestore.instance.collection('category_brand');
     await association.add({
       'categoryId': categoryId,
       'brandId': brandId,
@@ -75,10 +103,8 @@ class ProductProvider extends ChangeNotifier {
     FirebaseAnalytics.instance.logEvent(name: 'add_category_brand_association');
   }
 
-  Future fetchCategoriesAndBrands() async {
+  Future<void> fetchCategoriesAndBrands() async {
     try {
-      isLoading = true;
-      error = false;
       state = ProviderState.loading;
       notifyListeners();
       final items = await Future.wait([
@@ -87,13 +113,11 @@ class ProductProvider extends ChangeNotifier {
       ]);
       categories = items[0] as List<Category>;
       brands = items[1] as List<Brand>;
-      isLoading = false;
       state = ProviderState.idle;
       FirebaseAnalytics.instance.logEvent(name: 'fetch_category_and_brands');
     } catch (e) {
-      error = true;
-      isLoading = false;
       state = ProviderState.error;
+      error = true;
       AppUtil.showToast('Unable to fetch product $e');
       FirebaseAnalytics.instance
           .logEvent(name: 'error_fetch_category_and_brands');
@@ -102,23 +126,17 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  Future fetchProductsByCategoryBrand(String categoryId, String brandId) async {
+  Future<void> fetchProductsByCategoryBrand(String categoryId, String brandId) async {
     try {
-      isLoading = true;
-      error = false;
       state = ProviderState.loading;
-      products = [];
       notifyListeners();
-      products = await productService.fetchProductsByCategoryBrand(
-          categoryId, brandId);
-      isLoading = false;
+      products = await productService.fetchProductsByCategoryBrand(categoryId, brandId);
       state = ProviderState.idle;
       FirebaseAnalytics.instance
           .logEvent(name: 'fetch_products_by_category_brand');
     } catch (e) {
-      error = true;
-      isLoading = false;
       state = ProviderState.error;
+      error = true;
       AppUtil.showToast('Unable to fetch product $e');
       FirebaseAnalytics.instance
           .logEvent(name: 'error_fetch_products_by_category_brand');
@@ -129,44 +147,33 @@ class ProductProvider extends ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     try {
-      isLoading = true;
-      error = false;
       state = ProviderState.loading;
       notifyListeners();
 
       await productService.deleteProduct(id);
-
       products.removeWhere((element) => element.id == id);
 
-      isLoading = false;
       state = ProviderState.idle;
-      notifyListeners();
       FirebaseAnalytics.instance.logEvent(name: 'delete_product');
     } catch (e) {
-      isLoading = false;
-      error = true;
       state = ProviderState.error;
+      error = true;
       FirebaseAnalytics.instance.logEvent(name: 'error_delete_product');
     } finally {
       notifyListeners();
     }
   }
 
-  Future updateProduct(Product product) async {
+  Future<void> updateProduct(Product product) async {
     try {
-      isLoading = true;
-      error = false;
       state = ProviderState.loading;
       notifyListeners();
       await productService.updateProduct(product);
-      isLoading = false;
       state = ProviderState.idle;
-      notifyListeners();
       FirebaseAnalytics.instance.logEvent(name: 'update_product');
     } catch (e) {
-      isLoading = false;
-      error = true;
       state = ProviderState.error;
+      error = true;
       FirebaseAnalytics.instance.logEvent(name: 'error_update_product');
     } finally {
       notifyListeners();
@@ -175,14 +182,16 @@ class ProductProvider extends ChangeNotifier {
 
   Future<void> fetchAllProducts() async {
     try {
+      products.clear();
+      _searchQuery = '';
       state = ProviderState.loading;
       error = false;
-      products.clear();
       notifyListeners();
       products = await productService.fetchAllProducts();
       state = ProviderState.idle;
     } catch (e) {
       state = ProviderState.error;
+      error = true;
     } finally {
       notifyListeners();
     }

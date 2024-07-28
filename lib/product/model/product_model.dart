@@ -25,6 +25,7 @@ class Product {
     required this.stock,
     this.categoryName,
     this.discountAmount,
+    this.discountPercentage,
     this.brandName,
   });
 
@@ -36,6 +37,7 @@ class Product {
       'image': image ?? '',
       'description': description,
       'discountAmount': discountAmount,
+      'discountPercentage': discountPercentage,
       'categoryId': categoryId,
       'brandId': brandId,
       'stock': stock,
@@ -51,6 +53,7 @@ class Product {
       image: data['image'],
       description: data['description'],
       discountAmount: data['discountAmount'],
+      discountPercentage: data['discountPercentage'],
       categoryId: data['categoryId'],
       brandId: data['brandId'],
       stock: data['stock'],

@@ -1,0 +1,73 @@
+require 'yaml'
+
+
+class Properties < Hash
+  def initialize(file)
+    if File.exist?(file)
+      File.foreach(file) do |line|
+        key, value = line.chomp.split('=', 2)
+        self[key] = value
+      end
+    end
+  end
+
+  def store(file)
+    File.open(file, 'w') do |f|
+      each do |key, value|
+        f.puts "#{key}=#{value}"
+      end
+    end
+  end
+end
+
+      desc "Increment version code in local.properties"
+      lane :increment_version_code do
+        # Determine the path to the local.properties file
+        local_properties_path = File.join(File.dirname(__FILE__), "../local.properties")
+
+        # Load the properties from the local.properties file
+        local_properties = Properties.new(local_properties_path)
+
+        # Retrieve the current version code, increment it, and update the file
+        current_version_code = local_properties['flutter.versionCode']&.to_i || 1
+        new_version_code = current_version_code + 1
+        local_properties['flutter.versionCode'] = new_version_code.to_s
+
+        # Save the updated properties back to the file
+        local_properties.store(local_properties_path)
+
+        UI.message("Version code updated from #{current_version_code} to #{new_version_code}")
+      end
+
+releaseConfig = YAML.load_file('release_notes.yml')
+config = YAML.load_file('config.yml')
+
+platform :android do
+  desc "Android Firebase App Distribution Prod"
+
+  # Lane to build the release APK
+  lane :build_release_apk do
+    gradle(
+      task: 'assemble',
+      build_type: 'Release'
+    )
+  end
+
+  # Lane to deploy the APK to Firebase
+  lane :deploy_to_firebase do
+    firebase_app_distribution(
+      app: config['firebase_app_id'],
+      apk_path: "../build/app/outputs/flutter-apk/app-release.apk",
+      testers: config['testers_email'],
+      release_notes: releaseConfig['release_note'],
+      firebase_cli_path: "/usr/local/bin/firebase"
+    )
+  end
+
+  # Combined lane to build and deploy the APK
+  lane :build_and_deploy do
+    increment_version_code
+    build_release_apk
+    deploy_to_firebase
+  end
+end

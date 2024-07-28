@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/customer/provider/customer_provider.dart';
+import 'package:sanitary_mart_admin/customer/ui/customer_detail_screen.dart';
 import 'package:sanitary_mart_admin/incentive_points/ui/incentive_point_provider.dart';
 import 'package:sanitary_mart_admin/incentive_points/ui/screen/incentive_point_screen.dart';
 
@@ -54,7 +55,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       onPressed: (context) {
                         provider.setVerificationStatus(customer.uId, false);
                       },
-                      backgroundColor: (customer.verified??false)?Colors.red:Colors.red[100]!,
+                      backgroundColor: (customer.verified ?? false)
+                          ? Colors.red
+                          : Colors.red[100]!,
                       foregroundColor: Colors.white,
                       icon: Icons.close,
                       label: 'Reject',
@@ -63,7 +66,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
                       onPressed: (context) {
                         provider.setVerificationStatus(customer.uId, true);
                       },
-                      backgroundColor: (customer.verified??false)?Colors.green[100]!:Colors.green,
+                      backgroundColor: (customer.verified ?? false)
+                          ? Colors.green[100]!
+                          : Colors.green,
                       foregroundColor: Colors.white,
                       icon: Icons.check,
                       label: 'Accept',
@@ -75,11 +80,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   subtitle: Text(customer.email),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    Get.to(ChangeNotifierProvider(
-                        create: (BuildContext context) {
-                          return IncentivePointsProvider();
-                        },
-                        child: IncentivePointScreen(customer)));
+                    Get.to(CustomerDetailScreen(
+                      customer: customer,
+                    ));
+                    // Get.to(ChangeNotifierProvider(
+                    //     create: (BuildContext context) {
+                    //       return IncentivePointsProvider();
+                    //     },
+                    //     child: IncentivePointScreen(customer)));
                   },
                   // Add more customer details as needed
                 ),

@@ -6,8 +6,8 @@ import 'package:sanitary_mart_admin/product/model/product_model.dart';
 class ProductService extends BaseService {
   ProductService() : super('products');
 
-  Future addProduct(Product product) async {
-    await addData(product.toFirebase());
+  Future<String> addProduct(Product product) async {
+    return await addData(product.toFirebase());
   }
 
   Future<List<Product>> getProductsByCategory(String categoryId) async {
