@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/custom_search_view.dart';
 import 'package:sanitary_mart_admin/order/model/customer_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_status.dart';
@@ -80,26 +81,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       appBar: CustomAppBar(
         title: 'Orders',
         actions: [
-          SizedBox(
-            width: MediaQuery.of(context).size.width*0.7,
-            child: TextField(
-              controller: _searchController,
-
-              decoration: const InputDecoration(
-                hintText: 'Search by Order ID',
-                suffixIcon: Icon(Icons.search,color: Colors.white,),
-                hintStyle: TextStyle(color: Colors.white),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
           IconButton(
             onPressed: () {
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
                   return OrderFilterBottomSheet(
-                        (orderStatus) {
+                    (orderStatus) {
                       filterStatus = orderStatus;
                       filterOrderByStatus(filterStatus);
                     },
@@ -112,57 +100,71 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
         ],
       ),
-      body: Consumer<OrderProvider>(
-        builder: (context, provider, child) {
-          if (filteredOrders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'There are no orders',
-                    style: TextStyle(fontSize: 16.0, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  if (filterStatus != null)
-                    TextButton(
-                      onPressed: resetFilter,
-                      child: const Text('Reset Filter'),
-                    )
-                ],
-              ),
-            );
-          }
-          if (provider.state == ProviderState.loading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return Column(
-            children: [
-              ListTile(
-                title: Text(widget.customer.userName),
-                subtitle: Text(widget.customer.email),
-                // Add more customer details as needed
-              ),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: filteredOrders.length,
-                  itemBuilder: (context, index) {
-                    final order = filteredOrders[index];
-                    return OrderCard(
-                      order: order,
-                      key: UniqueKey(),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+            child: CustomSearchTextField(
+              controller: _searchController,
+              hintText: 'Search by Order ID',
+            ),
+          ),
+          Expanded(
+            child: Consumer<OrderProvider>(
+              builder: (context, provider, child) {
+                if (filteredOrders.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'There are no orders',
+                          style: TextStyle(
+                              fontSize: 16.0, color: Colors.grey[600]),
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        if (filterStatus != null)
+                          TextButton(
+                            onPressed: resetFilter,
+                            child: const Text('Reset Filter'),
+                          )
+                      ],
+                    ),
+                  );
+                }
+                if (provider.state == ProviderState.loading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return Column(
+                  children: [
+                    ListTile(
+                      title: Text(widget.customer.userName),
+                      subtitle: Text(widget.customer.email),
+                      // Add more customer details as needed
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filteredOrders.length,
+                        itemBuilder: (context, index) {
+                          final order = filteredOrders[index];
+                          return OrderCard(
+                            order: order,
+                            key: UniqueKey(),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

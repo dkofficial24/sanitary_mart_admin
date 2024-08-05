@@ -48,11 +48,13 @@ class _OrderCardState extends State<OrderCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Shri Balaji Sanitary & Elec.',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
+                const Expanded(
+                  child: Text(
+                    'Shri Balaji Sanitary & Elec.',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Row(
@@ -101,8 +103,7 @@ class _OrderCardState extends State<OrderCard> {
               children: [
                 const Text(
                   'Customer Details',
-                  style:
-                  TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                 ),
                 rowItem(
                   'Name:',
@@ -115,7 +116,7 @@ class _OrderCardState extends State<OrderCard> {
                 rowItem(
                   'Phone:',
                   (widget.order.customer?.phone != null &&
-                      widget.order.customer?.phone != 'null')
+                          widget.order.customer?.phone != 'null')
                       ? widget.order.customer?.phone ?? 'Unavailable'
                       : 'Unavailable',
                 ),
@@ -204,8 +205,7 @@ class _OrderCardState extends State<OrderCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('SubTotal:',
-                          style: TextStyle(fontSize: 14.0)),
+                      const Text('SubTotal:', style: TextStyle(fontSize: 14.0)),
                       Text(
                         total.toStringAsFixed(2),
                         style: const TextStyle(fontSize: 14.0),
@@ -318,7 +318,7 @@ class _OrderCardState extends State<OrderCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Order Note',
                     style: TextStyle(
                       fontSize: 20,
@@ -326,14 +326,14 @@ class _OrderCardState extends State<OrderCard> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
                   ),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Expanded(
                 child: SingleChildScrollView(
                   child: Text(
@@ -348,5 +348,4 @@ class _OrderCardState extends State<OrderCard> {
       },
     );
   }
-
 }
