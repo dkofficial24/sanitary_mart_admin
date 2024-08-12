@@ -17,6 +17,9 @@ import 'package:sanitary_mart_admin/customer/service/customer_firebase_service.d
 import 'package:sanitary_mart_admin/dashboard/ui/dashboard_screen.dart';
 import 'package:sanitary_mart_admin/firebase_options.dart';
 import 'package:sanitary_mart_admin/incentive_points/service/incentive_provider_service.dart';
+import 'package:sanitary_mart_admin/notification/provider/notification_provider.dart';
+import 'package:sanitary_mart_admin/notification/service/local_notification_service.dart';
+import 'package:sanitary_mart_admin/notification/service/notification_service.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/service/order_firebase_service.dart';
 import 'package:sanitary_mart_admin/payment/provider/payment_info_provider.dart';
@@ -28,6 +31,7 @@ import 'payment/service/payment_firebase_service.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LocalNotificationService.initialize();
   await initFirebase();
 
   FlutterError.onError = (errorDetails) {
@@ -38,6 +42,10 @@ Future main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+
+  final notificationService = NotificationService();
+  notificationService.listenForNewNotifications();
+
   runApp(const VendorAdminApp());
 }
 
@@ -96,6 +104,11 @@ class VendorAdminApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => PaymentInfoProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => NotificationProvider(
+            NotificationService(),
+          ),
         )
       ],
       child: Consumer<AuthenticationProvider>(
@@ -105,7 +118,7 @@ class VendorAdminApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               primarySwatch: AppColor.primaryColor,
-              primaryColor:AppColor.primaryColor,
+              primaryColor: AppColor.primaryColor,
             ),
             navigatorObservers: [observer],
             home: true ? const DashboardScreen() : LoginScreen(),

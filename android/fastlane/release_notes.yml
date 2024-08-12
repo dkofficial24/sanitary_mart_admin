@@ -1,7 +1,3 @@
 release_note: "
-- Customer detail screen
-- Fix: Error while add product
-- Fix: Error while edit product
-- Search bar in product stocks screen 
-- Order by ascending and descending product stocks
+- Notification for order placed implemented
 "

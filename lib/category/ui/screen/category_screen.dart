@@ -67,6 +67,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             }
 
             return GridView.builder(
+              padding: const EdgeInsets.only(bottom: 60),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 16.0,

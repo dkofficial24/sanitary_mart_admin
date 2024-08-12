@@ -59,6 +59,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   void filterOrderByStatus(OrderStatus? orderStatus) {
+
     if (orderStatus == null) {
       resetFilter();
       return;

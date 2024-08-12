@@ -58,6 +58,7 @@ class GridItemWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     name,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

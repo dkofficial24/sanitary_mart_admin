@@ -34,4 +34,13 @@ class AppUtil {
     var formatter = DateFormat('dd MMMM yyyy');
     return formatter.format(dateTime);
   }
+
+  static String convertTimestampInDateTime(int timestamp) {
+    var timestampInSeconds = timestamp ~/ 1000;
+
+    var dateTime =
+    DateTime.fromMillisecondsSinceEpoch(timestampInSeconds * 1000);
+    var formatter = DateFormat('dd MMM yyyy, hh:mm a');
+    return formatter.format(dateTime);
+  }
 }

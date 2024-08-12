@@ -390,7 +390,7 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
   }
 
   void _addEditProduct(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
+    if (true || _formKey.currentState!.validate()) {
       // if (isImageAvailable()) {
       final String name = nameController.text;
       final double price = double.parse(priceController.text);

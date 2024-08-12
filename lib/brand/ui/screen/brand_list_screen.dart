@@ -8,6 +8,7 @@ import 'package:sanitary_mart_admin/brand/provider/brand_provider.dart';
 import 'package:sanitary_mart_admin/brand/ui/screen/add_brand_screen.dart';
 import 'package:sanitary_mart_admin/brand/ui/screen/update_brand_screen.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/responsive_widget.dart';
 
 class BrandListScreen extends StatefulWidget {
   const BrandListScreen({super.key});
@@ -41,41 +42,106 @@ class _CategoryListScreenState extends State<BrandListScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Consumer<BrandProvider>(
-        builder: (BuildContext context, BrandProvider provider, Widget? child) {
-          if (provider.state == ProviderState.loading) {
-            return const ListViewShimmer();
-          }
-          return ListView.builder(
-            itemCount: provider.brandList.length,
-            itemBuilder: (context, index) {
-              final category = provider.brandList[index];
-              return Slidable(
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {
-                        _deleteBrand(context, category);
-                      },
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: 'Delete',
+      body: ResponsiveWidget(
+        largeScreen: Consumer<BrandProvider>(
+          builder: (BuildContext context, provider, Widget? child) {
+            if (provider.state == ProviderState.loading) {
+              return const ListViewShimmer();
+            }
+
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      ResponsiveWidget.isMediumScreen(context) ? 3 : 5,
+                  childAspectRatio: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: provider.brandList.length,
+                itemBuilder: (context, index) {
+                  final brand = provider.brandList[index];
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  ],
-                ),
-                child: ListTile(
-                  title: Text(category.name),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _editBrand(context, category),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          // Uncomment and use this if category has an image
+                          // ClipRRect(
+                          //   borderRadius: BorderRadius.circular(8),
+                          //   child: SizedBox(
+                          //       width: 30, height: 30,
+                          //       child: NetworkImageWidget(category.imagePath ?? '')),
+                          // ),
+                          Expanded(
+                            child: Text(
+                              brand.name,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: Colors.red,
+                            onPressed: () => _deleteBrand(context, brand),
+                          ),
+
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _editBrand(context, brand),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+        smallScreen: Consumer<BrandProvider>(
+          builder:
+              (BuildContext context, BrandProvider provider, Widget? child) {
+            if (provider.state == ProviderState.loading) {
+              return const ListViewShimmer();
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 60),
+              itemCount: provider.brandList.length,
+              itemBuilder: (context, index) {
+                final category = provider.brandList[index];
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          _deleteBrand(context, category);
+                        },
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
                   ),
-                ),
-              );
-            },
-          );
-        },
+                  child: ListTile(
+                    title: Text(category.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _editBrand(context, category),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

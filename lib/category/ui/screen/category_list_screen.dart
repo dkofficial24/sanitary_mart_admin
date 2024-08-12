@@ -8,6 +8,7 @@ import 'package:sanitary_mart_admin/category/provider/category_provider.dart';
 import 'package:sanitary_mart_admin/category/ui/screen/add_category_screen.dart';
 import 'package:sanitary_mart_admin/category/ui/screen/update_category_screen.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/responsive_widget.dart';
 
 class CategoryListScreen extends StatefulWidget {
   const CategoryListScreen({super.key});
@@ -41,48 +42,113 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Consumer<CategoryProvider>(
-        builder:
-            (BuildContext context, CategoryProvider provider, Widget? child) {
-          if (provider.state == ProviderState.loading) {
-            return const ListViewShimmer();
-          }
-          return ListView.builder(
-            itemCount: provider.categoryList.length,
-            itemBuilder: (context, index) {
-              final category = provider.categoryList[index];
-              return Slidable(
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (context) {
-                        _deleteCategory(context, category);
-                          },
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        ),
-                      ],
+      body: ResponsiveWidget(
+        largeScreen: Consumer<CategoryProvider>(
+          builder:
+              (BuildContext context, CategoryProvider provider, Widget? child) {
+            if (provider.state == ProviderState.loading) {
+              return const ListViewShimmer();
+            }
+
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      ResponsiveWidget.isMediumScreen(context) ? 3 : 5,
+                  childAspectRatio: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: provider.categoryList.length,
+                itemBuilder: (context, index) {
+                  final category = provider.categoryList[index];
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: ListTile(
-                      // leading: ClipRRect(
-                      //   borderRadius: BorderRadius.circular(8),
-                      //   child: SizedBox(
-                      //       width: 30,height: 30,
-                      //       child: NetworkImageWidget(category.imagePath ?? '')),
-                      // ),
-                      title: Text(category.name),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _editCategory(context, category),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          // Uncomment and use this if category has an image
+                          // ClipRRect(
+                          //   borderRadius: BorderRadius.circular(8),
+                          //   child: SizedBox(
+                          //       width: 30, height: 30,
+                          //       child: NetworkImageWidget(category.imagePath ?? '')),
+                          // ),
+                          Expanded(
+                            child: Text(
+                              category.name,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: Colors.red,
+                            onPressed: () => _deleteCategory(context, category),
+                          ),
+
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _editCategory(context, category),
+                          ),
+                        ],
                       ),
                     ),
                   );
                 },
-              );
-        },
+              ),
+            );
+          },
+        ),
+        smallScreen: Consumer<CategoryProvider>(
+          builder:
+              (BuildContext context, CategoryProvider provider, Widget? child) {
+            if (provider.state == ProviderState.loading) {
+              return const ListViewShimmer();
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 60),
+              itemCount: provider.categoryList.length,
+              itemBuilder: (context, index) {
+                final category = provider.categoryList[index];
+                return Slidable(
+                  endActionPane: ActionPane(
+                    motion: const ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) {
+                          _deleteCategory(context, category);
+                        },
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    // leading: ClipRRect(
+                    //   borderRadius: BorderRadius.circular(8),
+                    //   child: SizedBox(
+                    //       width: 30,height: 30,
+                    //       child: NetworkImageWidget(category.imagePath ?? '')),
+                    // ),
+                    title: Text(category.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _editCategory(context, category),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

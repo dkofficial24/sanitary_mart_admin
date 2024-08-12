@@ -69,53 +69,60 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 10.0),
+                  Text(
+                    // Display original price with strikethrough
+                    '₹${widget.product.price.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16.0,
+                    ),
+                  ),
                   // Display discounted price if available
-                  if (widget.product.discountAmount != null &&
-                      widget.product.discountAmount != 0) ...[
-                    Row(
-                      children: [
-                        Text(
-                          // Display original price with strikethrough
-                          '₹${widget.product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 10.0),
-                        if (widget.product.discountPercentage != null &&
-                            widget.product.discountPercentage != 0)
-                          Text(
-                            // Display discounted price with larger font
-                            '₹${(widget.product.price * (1 - widget.product.discountPercentage! / 100)).toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                        if (widget.product.discountAmount != null)
-                          Text(
-                            // Display discounted price with larger font
-                            '₹${(widget.product.price - widget.product.discountAmount!).toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ] else ...[
-                    Text(
-                      '₹${widget.product.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  // if (widget.product.discountAmount != null &&
+                  //     widget.product.discountAmount != 0) ...[
+                  //   Row(
+                  //     children: [
+                  //       Text(
+                  //         // Display original price with strikethrough
+                  //         '₹${widget.product.price.toStringAsFixed(2)}',
+                  //         style: const TextStyle(
+                  //           fontSize: 16.0,
+                  //           decoration: TextDecoration.lineThrough,
+                  //           color: Colors.grey,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(width: 10.0),
+                  //       if (widget.product.discountPercentage != null &&
+                  //           widget.product.discountPercentage != 0)
+                  //         Text(
+                  //           // Display discounted price with larger font
+                  //           '₹${(widget.product.price * (1 - widget.product.discountPercentage! / 100)).toStringAsFixed(2)}',
+                  //           style: const TextStyle(
+                  //             fontSize: 18.0,
+                  //             fontWeight: FontWeight.bold,
+                  //             color: Colors.green,
+                  //           ),
+                  //         ),
+                  //       if (widget.product.discountAmount != null)
+                  //         Text(
+                  //           // Display discounted price with larger font
+                  //           '₹${(widget.product.price - widget.product.discountAmount!).toStringAsFixed(2)}',
+                  //           style: const TextStyle(
+                  //             fontSize: 18.0,
+                  //             fontWeight: FontWeight.bold,
+                  //             color: Colors.green,
+                  //           ),
+                  //         ),
+                  //     ],
+                  //   ),
+                  // ] else ...[
+                  //   Text(
+                  //     '₹${widget.product.price.toStringAsFixed(2)}',
+                  //     style: const TextStyle(
+                  //       fontSize: 18.0,
+                  //       fontWeight: FontWeight.bold,
+                  //     ),
+                  //   ),
+                  // ],
                   const SizedBox(height: 10.0),
                   // Display brand and category if available
                   if (widget.product.brandName != null)
@@ -157,9 +164,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future fetchBrandAndCategory(String categoryId, String brandId) async {
     isLoading = true;
-    setState(() {
-
-    });
+    setState(() {});
     CategoryProvider categoryProvider =
         Provider.of<CategoryProvider>(context, listen: false);
     BrandProvider brandProvider =
@@ -172,8 +177,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     selectedCategory = result.isNotEmpty ? result[0] as Category? : null;
     selectedBrand = result.length > 1 ? result[1] as Brand? : null;
-    widget.product.categoryName =selectedCategory?.name;
-    widget.product.brandName =selectedBrand?.name;
+    widget.product.categoryName = selectedCategory?.name;
+    widget.product.brandName = selectedBrand?.name;
     if (mounted) {
       isLoading = false;
       setState(() {});
