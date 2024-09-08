@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:get/route_manager.dart';
 import 'package:sanitary_mart_admin/brand/model/brand_model.dart';
 import 'package:sanitary_mart_admin/brand/service/brand_firebase_service.dart';
 import 'package:sanitary_mart_admin/category/model/category_model.dart';
@@ -33,6 +34,7 @@ class ProductProvider extends ChangeNotifier {
   Timer? _debounce;
 
   String get searchQuery => _searchQuery;
+
   bool get isAscending => _isAscending;
 
   void updateSearchQuery(String query) {
@@ -53,9 +55,8 @@ class ProductProvider extends ChangeNotifier {
       return product.name.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
-    filteredProducts.sort((a, b) => _isAscending
-        ? a.stock.compareTo(b.stock)
-        : b.stock.compareTo(a.stock));
+    filteredProducts.sort((a, b) =>
+        _isAscending ? a.stock.compareTo(b.stock) : b.stock.compareTo(a.stock));
 
     return filteredProducts;
   }
@@ -81,6 +82,7 @@ class ProductProvider extends ChangeNotifier {
       products.add(product);
       AppUtil.showToast('Product added successfully!');
       state = ProviderState.idle;
+      Get.back();
       FirebaseAnalytics.instance.logEvent(name: 'product_added');
     } catch (e) {
       state = ProviderState.error;
@@ -92,10 +94,38 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> updateProduct(Product product) async {
+    try {
+      state = ProviderState.loading;
+      notifyListeners();
+
+      if (product.image != null && product.image!.isNotEmpty) {
+        if (!product.image!.startsWith('http://') &&
+            !product.image!.startsWith('https://')) {
+          File file = await AppUtil.compressImage(File(product.image!));
+          String path = await productService.uploadImage(file.path);
+          product.image = path;
+        }
+      }
+
+      await productService.updateProduct(product);
+      AppUtil.showToast('Product updated successfully!');
+      Get.back();
+      state = ProviderState.idle;
+      FirebaseAnalytics.instance.logEvent(name: 'update_product');
+    } catch (e) {
+      state = ProviderState.error;
+      error = true;
+      FirebaseAnalytics.instance.logEvent(name: 'error_update_product');
+    } finally {
+      notifyListeners();
+    }
+  }
+
   Future<void> addCategoryBrandAssociation(
       String categoryId, String brandId) async {
     final CollectionReference association =
-    FirebaseFirestore.instance.collection('category_brand');
+        FirebaseFirestore.instance.collection('category_brand');
     await association.add({
       'categoryId': categoryId,
       'brandId': brandId,
@@ -126,11 +156,14 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchProductsByCategoryBrand(String categoryId, String brandId) async {
+  Future<void> fetchProductsByCategoryBrand(
+      String categoryId, String brandId) async {
     try {
       state = ProviderState.loading;
       notifyListeners();
-      products = await productService.fetchProductsByCategoryBrand(categoryId, brandId);
+      products = await productService.fetchProductsByCategoryBrand(
+          categoryId, brandId);
+      Product.sortByCreated(products);
       state = ProviderState.idle;
       FirebaseAnalytics.instance
           .logEvent(name: 'fetch_products_by_category_brand');
@@ -152,29 +185,12 @@ class ProductProvider extends ChangeNotifier {
 
       await productService.deleteProduct(id);
       products.removeWhere((element) => element.id == id);
-
       state = ProviderState.idle;
       FirebaseAnalytics.instance.logEvent(name: 'delete_product');
     } catch (e) {
       state = ProviderState.error;
       error = true;
       FirebaseAnalytics.instance.logEvent(name: 'error_delete_product');
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  Future<void> updateProduct(Product product) async {
-    try {
-      state = ProviderState.loading;
-      notifyListeners();
-      await productService.updateProduct(product);
-      state = ProviderState.idle;
-      FirebaseAnalytics.instance.logEvent(name: 'update_product');
-    } catch (e) {
-      state = ProviderState.error;
-      error = true;
-      FirebaseAnalytics.instance.logEvent(name: 'error_update_product');
     } finally {
       notifyListeners();
     }
@@ -188,6 +204,7 @@ class ProductProvider extends ChangeNotifier {
       error = false;
       notifyListeners();
       products = await productService.fetchAllProducts();
+      Product.sortByCreated(products);
       state = ProviderState.idle;
     } catch (e) {
       state = ProviderState.error;

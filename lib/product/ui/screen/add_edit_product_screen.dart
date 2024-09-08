@@ -28,9 +28,9 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController stockQuantityController = TextEditingController();
   final TextEditingController percentDiscountController =
-      TextEditingController(text: '0');
+      TextEditingController(text: '');
   final TextEditingController discountAmountController =
-      TextEditingController(text: '0');
+      TextEditingController(text: '');
   File? _image;
 
   DiscountType? _discountType =
@@ -56,15 +56,18 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     nameController.text = product.name;
     priceController.text = product.price.toString();
     descriptionController.text = product.description;
-
     stockQuantityController.text = product.stock.toString();
-    if (product.discountAmount != null) {
+    if (product.discountAmount != null && product.discountAmount != 0) {
       discountAmountController.text = product.discountAmount.toString();
       _discountType = DiscountType.amount;
     } else if (product.discountPercentage != null) {
       _discountType = DiscountType.percentage;
-      percentDiscountController.text = product.discountPercentage.toString();
+      percentDiscountController.text = (product.discountPercentage != 0)
+          ? product.discountPercentage.toString()
+          : '';
     }
+
+    print("ImagePath ->> ${widget.initialProduct!.image}");
   }
 
   Future init() async {
@@ -213,9 +216,7 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
                 },
               ),
               const SizedBox(height: 10),
-              // Inside the formBody method, after the existing form fields...
 
-// Radio buttons for Discount Type
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -376,16 +377,16 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
         border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: _image == null && !isEditing
-          ? const Center(
-              child: Text(
-                'No image selected',
-                style: TextStyle(color: Colors.grey),
-              ),
-            )
-          : isEditing
-              ? NetworkImageWidget(widget.initialProduct?.image ?? '')
-              : Image.file(_image!, fit: BoxFit.cover),
+      child: _image == null
+          ? isEditing
+              ? NetworkImageWidget(widget.initialProduct!.image ?? '')
+              : const Center(
+                  child: Text(
+                    'No image selected',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                )
+          : Image.file(_image!, fit: BoxFit.cover),
     );
   }
 
@@ -393,7 +394,7 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
     if (true || _formKey.currentState!.validate()) {
       // if (isImageAvailable()) {
       final String name = nameController.text;
-      final double price = double.parse(priceController.text);
+      final double price = double.tryParse(priceController.text) ?? 0;
       final String description = descriptionController.text;
 
       if (selectedCategory != null && selectedBrand != null) {
@@ -422,16 +423,21 @@ class AddEditProductScreenState extends State<AddEditProductScreen> {
           description: description,
           discountAmount: discountAmount,
           discountPercentage: discountPercentage,
-          stock: int.parse(stockQuantityController.text),
+          stock: int.tryParse(stockQuantityController.text) ?? 1,
           categoryId: selectedCategory!.id!,
           brandId: selectedBrand!.id!,
-          image: _image?.path,
+          image: isEditing
+              ? _image?.path ?? widget.initialProduct!.image
+              : _image?.path,
         );
         final provider = getProductProvider(context);
         if (isEditing) {
+          newProduct.created = widget.initialProduct?.created;
+          newProduct.modified = DateTime.now().millisecondsSinceEpoch;
           provider.updateProduct(newProduct);
         } else {
-          getProductProvider(context).addProduct(newProduct);
+          newProduct.created = DateTime.now().millisecondsSinceEpoch;
+          provider.addProduct(newProduct);
         }
       } else {
         AppUtil.showToast('Product brand or category is missing');

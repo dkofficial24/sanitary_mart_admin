@@ -9,6 +9,7 @@ import 'package:sanitary_mart_admin/brand/ui/screen/update_brand_screen.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/core/widget/error_retry_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/grid_item_widget.dart';
+import 'package:sanitary_mart_admin/core/widget/list_item_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/shimmer_grid_list_widget.dart';
 import 'package:sanitary_mart_admin/product/ui/screen/product_list_screen_new.dart';
 
@@ -56,7 +57,7 @@ class _BrandScreenState extends State<BrandScreen> {
         child: Consumer<BrandProvider>(
           builder: (context, provider, child) {
             if (provider.state == ProviderState.loading) {
-              return const ShimmerGridListWidget();
+              return const ListViewShimmer();
             } else if (provider.state == ProviderState.error) {
               return ErrorRetryWidget(
                 onRetry: () {
@@ -71,35 +72,29 @@ class _BrandScreenState extends State<BrandScreen> {
               );
             }
 
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 1.0,
-              ),
+            return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 60),
               itemCount: provider.brandList.length,
               itemBuilder: (context, index) {
                 final brand = provider.brandList[index];
-                return GridItemWidget(
+                return ListItemWidget(
                   name: brand.name,
-                  image: brand.imagePath ?? '',
-                  onItemTap: () {
+                  imagePath: brand.imagePath,
+                  onTapCallback: (){
                     Get.to(ProductListScreenNew(
                       categoryId: widget.categoryId,
                       brandId: brand.id!,
                       brandName: brand.name,
                     ));
                   },
-                  deleteCallback: () {
+                  onDeleteCallback: (){
                     showDeleteBrandDialog(context, brand);
                   },
-                  editCallback: () {
+                  onEditCallback: (){
                     _editBrand(context, brand, widget.categoryId);
                   },
                 );
-              },
-            );
+              });
           },
         ),
       ),

@@ -11,6 +11,7 @@ import 'package:sanitary_mart_admin/category/ui/screen/update_category_screen.da
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/core/widget/error_retry_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/grid_item_widget.dart';
+import 'package:sanitary_mart_admin/core/widget/list_item_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/shimmer_grid_list_widget.dart';
 
 class CategoryScreen extends StatefulWidget {
@@ -51,7 +52,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         child: Consumer<CategoryProvider>(
           builder: (context, provider, child) {
             if (provider.state == ProviderState.loading) {
-              return const ShimmerGridListWidget();
+              return const ListViewShimmer();
             } else if (provider.state == ProviderState.error) {
               return ErrorRetryWidget(
                 onRetry: () {
@@ -66,28 +67,22 @@ class _CategoryScreenState extends State<CategoryScreen> {
               );
             }
 
-            return GridView.builder(
+            return ListView.builder(
               padding: const EdgeInsets.only(bottom: 60),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 1.0,
-              ),
               itemCount: provider.categoryList.length,
               itemBuilder: (context, index) {
                 final category = provider.categoryList[index];
-                return GridItemWidget(
+                return ListItemWidget(
                   name: category.name,
-                  image: category.imagePath ?? '',
-                  onItemTap: () {
+                  imagePath: category.imagePath,
+                  onDeleteCallback: () {
+                    showDeleteCategoryDialog(context, category);
+                  },
+                  onTapCallback: () {
                     Get.to(BrandScreen(category.id!));
                   },
-                  editCallback: () {
+                  onEditCallback: () {
                     _editCategory(category);
-                  },
-                  deleteCallback: () {
-                    showDeleteCategoryDialog(context, category);
                   },
                 );
               },

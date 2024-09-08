@@ -88,7 +88,7 @@ class NotificationService {
           if (change.type == DocumentChangeType.added) {
             NotificationModel notification =
                 NotificationModel.fromFirestore(change.doc);
-            if(notification.status=='read'){
+            if (notification.status == 'read') {
               return;
             }
             LocalNotificationService.showNotification(

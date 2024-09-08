@@ -76,53 +76,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       fontSize: 16.0,
                     ),
                   ),
-                  // Display discounted price if available
-                  // if (widget.product.discountAmount != null &&
-                  //     widget.product.discountAmount != 0) ...[
-                  //   Row(
-                  //     children: [
-                  //       Text(
-                  //         // Display original price with strikethrough
-                  //         '₹${widget.product.price.toStringAsFixed(2)}',
-                  //         style: const TextStyle(
-                  //           fontSize: 16.0,
-                  //           decoration: TextDecoration.lineThrough,
-                  //           color: Colors.grey,
-                  //         ),
-                  //       ),
-                  //       const SizedBox(width: 10.0),
-                  //       if (widget.product.discountPercentage != null &&
-                  //           widget.product.discountPercentage != 0)
-                  //         Text(
-                  //           // Display discounted price with larger font
-                  //           '₹${(widget.product.price * (1 - widget.product.discountPercentage! / 100)).toStringAsFixed(2)}',
-                  //           style: const TextStyle(
-                  //             fontSize: 18.0,
-                  //             fontWeight: FontWeight.bold,
-                  //             color: Colors.green,
-                  //           ),
-                  //         ),
-                  //       if (widget.product.discountAmount != null)
-                  //         Text(
-                  //           // Display discounted price with larger font
-                  //           '₹${(widget.product.price - widget.product.discountAmount!).toStringAsFixed(2)}',
-                  //           style: const TextStyle(
-                  //             fontSize: 18.0,
-                  //             fontWeight: FontWeight.bold,
-                  //             color: Colors.green,
-                  //           ),
-                  //         ),
-                  //     ],
-                  //   ),
-                  // ] else ...[
-                  //   Text(
-                  //     '₹${widget.product.price.toStringAsFixed(2)}',
-                  //     style: const TextStyle(
-                  //       fontSize: 18.0,
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  // ],
                   const SizedBox(height: 10.0),
                   // Display brand and category if available
                   if (widget.product.brandName != null)

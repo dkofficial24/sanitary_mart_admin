@@ -18,7 +18,6 @@ abstract class BaseService {
       await docRef.set(data);
       return data['id'];
     } catch (e) {
-      // Handle errors appropriately (e.g., print, throw exception)
       print("Error adding data: $e");
       throw 'Unable to add data';
     }

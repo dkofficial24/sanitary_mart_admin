@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/core/widget/error_retry_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/product_list_view_item_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/shimmer_grid_list_widget.dart';
 import 'package:sanitary_mart_admin/product/provider/product_provider.dart';
+import 'package:sanitary_mart_admin/product/ui/screen/add_edit_product_screen.dart';
 
 class ProductStockScreen extends StatefulWidget {
   const ProductStockScreen({super.key});
@@ -38,8 +40,8 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stock'),
+      appBar: CustomAppBar(
+        title: 'Stock',
         actions: [
           IconButton(
             icon: Icon(
@@ -122,14 +124,13 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             final product = provider.filteredProducts[index];
-
             return ProductListViewItemWidget(
               product: product,
               onPressed: (context) async {
-                // await Get.to(AddEditProductScreen(
-                //   initialProduct: product,
-                // ));
-                // fetchAllProducts();
+                await Get.to(AddEditProductScreen(
+                  initialProduct: product,
+                ));
+                fetchAllProducts();
               },
             );
           },

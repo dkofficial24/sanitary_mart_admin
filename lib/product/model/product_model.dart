@@ -13,6 +13,8 @@ class Product {
   int stock;
   String? categoryName;
   String? brandName;
+  int? created;
+  int? modified;
 
   Product({
     this.id,
@@ -21,12 +23,14 @@ class Product {
     required this.description,
     required this.categoryId,
     required this.brandId,
-     this.image,
+    this.image,
     required this.stock,
     this.categoryName,
     this.discountAmount,
     this.discountPercentage,
     this.brandName,
+    this.created,
+    this.modified,
   });
 
   Map<String, dynamic> toFirebase() {
@@ -41,6 +45,8 @@ class Product {
       'categoryId': categoryId,
       'brandId': brandId,
       'stock': stock,
+      'created': created,
+      'modified': modified,
     };
   }
 
@@ -59,6 +65,18 @@ class Product {
       stock: data['stock'],
       brandName: data['brandName'],
       categoryName: data['categoryName'],
+      created: data['created'],
+      modified: data['modified'],
     );
+  }
+
+  static List<Product> sortByModified(List<Product> products) {
+    products.sort((a, b) => (b.modified ?? 0).compareTo(a.modified ?? 0));
+    return products;
+  }
+
+  static List<Product> sortByCreated(List<Product> products) {
+    products.sort((a, b) => (b.created ?? 0).compareTo(a.created ?? 0));
+    return products;
   }
 }

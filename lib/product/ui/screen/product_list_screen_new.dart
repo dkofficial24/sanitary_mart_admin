@@ -9,7 +9,6 @@ import 'package:sanitary_mart_admin/core/widget/shimmer_grid_list_widget.dart';
 import 'package:sanitary_mart_admin/product/model/product_model.dart';
 import 'package:sanitary_mart_admin/product/provider/product_provider.dart';
 import 'package:sanitary_mart_admin/product/ui/screen/add_edit_product_screen.dart';
-import 'package:sanitary_mart_admin/product/ui/screen/product_detail_screen.dart';
 
 class ProductListScreenNew extends StatefulWidget {
   const ProductListScreenNew({
@@ -37,7 +36,8 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
   }
 
   void fetchProductsByCategoryBrand() {
-    Provider.of<ProductProvider>(context, listen: false).fetchProductsByCategoryBrand(
+    Provider.of<ProductProvider>(context, listen: false)
+        .fetchProductsByCategoryBrand(
       widget.categoryId,
       widget.brandId,
     );
@@ -51,7 +51,7 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Get.to(const AddEditProductScreen());
+          openAddEditProductScreen();
         },
         child: const Icon(Icons.add),
       ),
@@ -82,11 +82,8 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
 
                 return ProductListViewItemWidget(
                   product: product,
-                  onPressed: (context)async{
-                    await Get.to(AddEditProductScreen(
-                      initialProduct: product,
-                    ));
-                    fetchProductsByCategoryBrand();
+                  onPressed: (context) async {
+                    await openAddEditProductScreen(product: product);
                   },
                 );
               },
@@ -95,6 +92,13 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
         ),
       ),
     );
+  }
+
+  Future<void> openAddEditProductScreen({Product? product}) async {
+    await Get.to(AddEditProductScreen(
+      initialProduct: product,
+    ));
+    fetchProductsByCategoryBrand();
   }
 
   void deleteProductDialog(BuildContext context, Product product) {

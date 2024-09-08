@@ -68,7 +68,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
       hideLoader();
 
-      Get.offAll( DashboardScreen());
+      Get.offAll(DashboardScreen());
     } on FirebaseAuthException catch (e) {
       hideLoader();
       Get.snackbar(AppText.error, e.message.toString());

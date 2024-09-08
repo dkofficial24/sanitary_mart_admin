@@ -3,11 +3,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:sanitary_mart_admin/brand/ui/screen/brand_screen.dart';
 import 'package:sanitary_mart_admin/category/model/category_model.dart';
 import 'package:sanitary_mart_admin/category/provider/category_provider.dart';
 import 'package:sanitary_mart_admin/category/ui/screen/add_category_screen.dart';
 import 'package:sanitary_mart_admin/category/ui/screen/update_category_screen.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
+import 'package:sanitary_mart_admin/core/widget/list_item_widget.dart';
 import 'package:sanitary_mart_admin/core/widget/responsive_widget.dart';
 
 class CategoryListScreen extends StatefulWidget {
@@ -52,14 +54,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
 
             return Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      ResponsiveWidget.isMediumScreen(context) ? 3 : 5,
-                  childAspectRatio: 3,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
+              child: ListView.builder(
                 itemCount: provider.categoryList.length,
                 itemBuilder: (context, index) {
                   final category = provider.categoryList[index];
@@ -69,32 +64,73 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
                       child: Row(
                         children: [
-                          // Uncomment and use this if category has an image
-                          // ClipRRect(
-                          //   borderRadius: BorderRadius.circular(8),
-                          //   child: SizedBox(
-                          //       width: 30, height: 30,
-                          //       child: NetworkImageWidget(category.imagePath ?? '')),
-                          // ),
+                          const Icon(
+                            Icons.category,
+                            color: Colors.blueAccent,
+                          ),
+
+                          const SizedBox(width: 16.0),
+
                           Expanded(
+                            flex: 2,
                             child: Text(
                               category.name,
                               style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                // Slightly larger font for better visibility
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.red,
-                            onPressed: () => _deleteCategory(context, category),
-                          ),
 
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () => _editCategory(context, category),
+                          // Spacing between text and buttons
+                          const SizedBox(width: 16.0),
+
+                          // Action Buttons
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Delete Button
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.1),
+                                    // Light red background
+                                    shape: BoxShape.circle, // Circular shape
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    color: Colors.red, // Icon color
+                                    onPressed: () =>
+                                        _deleteCategory(context, category),
+                                    tooltip: 'Delete Category',
+                                  ),
+                                ),
+                                const SizedBox(width: 12.0),
+                                // Spacing between buttons
+
+                                // Edit Button
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    // Light blue background
+                                    shape: BoxShape.circle, // Circular shape
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    color: Colors.blue, // Icon color
+                                    onPressed: () =>
+                                        _editCategory(context, category),
+                                    tooltip: 'Edit Category',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -116,35 +152,18 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
               itemCount: provider.categoryList.length,
               itemBuilder: (context, index) {
                 final category = provider.categoryList[index];
-                return Slidable(
-                  endActionPane: ActionPane(
-                    motion: const ScrollMotion(),
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) {
-                          _deleteCategory(context, category);
-                        },
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        icon: Icons.delete,
-                        label: 'Delete',
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    // leading: ClipRRect(
-                    //   borderRadius: BorderRadius.circular(8),
-                    //   child: SizedBox(
-                    //       width: 30,height: 30,
-                    //       child: NetworkImageWidget(category.imagePath ?? '')),
-                    // ),
-                    title: Text(category.name),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () => _editCategory(context, category),
-                    ),
-                  ),
+                return ListItemWidget(
+                  imagePath: category.imagePath,
+                  name: category.name,onDeleteCallback: (){
+                  _deleteCategory(context, category);
+                },onTapCallback: (){
+                  Get.to(BrandScreen(category.id!));
+                },
+                onEditCallback: (){
+                  _editCategory(context, category);
+                },
                 );
+
               },
             );
           },
