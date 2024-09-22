@@ -20,6 +20,7 @@ import 'package:sanitary_mart_admin/incentive_points/service/incentive_provider_
 import 'package:sanitary_mart_admin/notification/provider/notification_provider.dart';
 import 'package:sanitary_mart_admin/notification/service/local_notification_service.dart';
 import 'package:sanitary_mart_admin/notification/service/notification_service.dart';
+import 'package:sanitary_mart_admin/order/provider/customer_order_provider.dart';
 import 'package:sanitary_mart_admin/order/provider/order_provider.dart';
 import 'package:sanitary_mart_admin/order/service/order_firebase_service.dart';
 import 'package:sanitary_mart_admin/payment/provider/payment_info_provider.dart';
@@ -72,6 +73,7 @@ class VendorAdminApp extends StatelessWidget {
     Get.put(PaymentFirebaseService());
     Get.put(IncentivePointService());
     Get.put(productFirebaseService);
+    Get.put(NotificationService());
     StorageHelper storageHelper = StorageHelper();
 
     final authProvider = AuthenticationProvider(
@@ -107,7 +109,12 @@ class VendorAdminApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => NotificationProvider(
-            NotificationService(),
+            Get.find(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => CustomerOrderProvider(
+            OrderFirebaseService(),
           ),
         )
       ],
