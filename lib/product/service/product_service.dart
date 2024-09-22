@@ -6,6 +6,8 @@ import 'package:sanitary_mart_admin/product/model/product_model.dart';
 class ProductService extends BaseService {
   ProductService() : super('products');
 
+  DocumentSnapshot? _lastDocument;
+
   Future<String> addProduct(Product product) async {
     return await addData(product.toFirebase());
   }
@@ -26,9 +28,27 @@ class ProductService extends BaseService {
     return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
   }
 
-  Future<List<Product>> fetchAllProducts() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection(collectionName).get();
+  Future<List<Product>> fetchProducts({
+    int limit = 10,
+    bool isInitialLoad = false,
+  }) async {
+    Query query = FirebaseFirestore.instance
+        .collection('products')
+        .limit(limit);
+
+    // For subsequent fetches, start after the last document
+    if (_lastDocument != null && !isInitialLoad) {
+      query = query.startAfterDocument(_lastDocument!);
+    }
+
+    final snapshot = await query.get();
+
+    // Update the last document for pagination
+    if (snapshot.docs.isNotEmpty) {
+      _lastDocument = snapshot.docs.last;
+    }
+
+    // Map the documents to Product objects
     return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
   }
 
@@ -101,5 +121,9 @@ class ProductService extends BaseService {
         .collection(collectionName)
         .doc(productId)
         .delete();
+  }
+
+  void resetPagination() {
+    _lastDocument = null;
   }
 }

@@ -33,6 +33,9 @@ class ProductProvider extends ChangeNotifier {
   bool _isAscending = true;
   Timer? _debounce;
 
+  bool hasMoreProducts = true;
+  bool isFetchingMore = false;
+
   String get searchQuery => _searchQuery;
 
   bool get isAscending => _isAscending;
@@ -195,21 +198,35 @@ class ProductProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  Future<void> fetchProducts({int limit = 10, bool isRefresh = false}) async {
+    if (isFetchingMore || (!hasMoreProducts && !isRefresh)) return;  // Prevent duplicate fetch
 
-  Future<void> fetchAllProducts() async {
     try {
-      products.clear();
-      _searchQuery = '';
-      state = ProviderState.loading;
-      error = false;
+      if (isRefresh) {
+        state = ProviderState.loading;
+        error = false;
+        hasMoreProducts = true;
+        productService.resetPagination();  // Reset pagination for initial load
+        products.clear();  // Clear the existing products
+      }
+
       notifyListeners();
-      products = await productService.fetchAllProducts();
-      Product.sortByCreated(products);
-      state = ProviderState.idle;
+
+      // Fetch products from service (pagination handled there)
+      final newProducts = await productService.fetchProducts(limit: limit);
+
+      if (newProducts.isNotEmpty) {
+        products.addAll(newProducts);
+      }
+
+      if (newProducts.length < limit) {
+        hasMoreProducts = false;  // No more products available if batch is less than limit
+      }
     } catch (e) {
-      state = ProviderState.error;
       error = true;
     } finally {
+      state = ProviderState.idle;
+      isFetchingMore = false;
       notifyListeners();
     }
   }

@@ -17,24 +17,39 @@ class ProductStockScreen extends StatefulWidget {
 }
 
 class _ProductStockScreenState extends State<ProductStockScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      fetchAllProducts();
-    });
     super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      fetchAllProducts(); // Initial fetch
+    });
+
+    // Listener to detect when the user scrolls near the bottom and fetch more products
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 && // Trigger when 200px close to the bottom
+          !context.read<ProductProvider>().isFetchingMore) {
+        fetchMoreProducts();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   void fetchAllProducts() {
-    Provider.of<ProductProvider>(context, listen: false).fetchAllProducts();
+    Provider.of<ProductProvider>(context, listen: false).fetchProducts(isRefresh: true);
+  }
+
+  void fetchMoreProducts() {
+    Provider.of<ProductProvider>(context, listen: false).fetchProducts();
   }
 
   @override
@@ -59,39 +74,36 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
         padding: const EdgeInsets.all(16),
         child: Consumer<ProductProvider>(
           builder: (context, provider, child) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search products',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            context
-                                .read<ProductProvider>()
-                                .updateSearchQuery('');
-                          },
-                        ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search products',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                      onChanged: (query) {
-                        context
-                            .read<ProductProvider>()
-                            .updateSearchQuery(query);
-                      },
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          context.read<ProductProvider>().updateSearchQuery('');
+                          fetchAllProducts(); // Refresh the list after clearing search
+                        },
+                      ),
                     ),
+                    onChanged: (query) {
+                      context.read<ProductProvider>().updateSearchQuery(query);
+                    },
                   ),
-                  body(provider),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: body(provider),
+                ),
+              ],
             );
           },
         ),
@@ -100,42 +112,37 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
   }
 
   Widget body(ProductProvider provider) {
-    if (provider.state == ProviderState.loading) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 8.0),
-        child: ShimmerGridListWidget(),
-      );
-    } else if (provider.state == ProviderState.error) {
-      return ErrorRetryWidget(
-        onRetry: fetchAllProducts,
-      );
+    if (provider.state == ProviderState.loading && provider.products.isEmpty) {
+      return const ShimmerGridListWidget();
+    } else if (provider.state == ProviderState.error && provider.products.isEmpty) {
+      return ErrorRetryWidget(onRetry: fetchAllProducts);
     }
 
     if (provider.filteredProducts.isEmpty) {
-      return const Center(
-        child: Text('No products available'),
-      );
+      return const Center(child: Text('No products available'));
     }
-    return Column(
-      children: [
-        ListView.builder(
-          itemCount: provider.filteredProducts.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            final product = provider.filteredProducts[index];
-            return ProductListViewItemWidget(
-              product: product,
-              onPressed: (context) async {
-                await Get.to(AddEditProductScreen(
-                  initialProduct: product,
-                ));
-                fetchAllProducts();
-              },
-            );
-          },
-        ),
-      ],
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: provider.filteredProducts.length + (provider.hasMoreProducts ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index < provider.filteredProducts.length) {
+          final product = provider.filteredProducts[index];
+          return ProductListViewItemWidget(
+            product: product,
+            onPressed: (context) async {
+              await Get.to(AddEditProductScreen(initialProduct: product));
+              fetchAllProducts(); // Refresh after editing a product
+            },
+          );
+        } else {
+          // Show loading indicator when fetching more products
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 }
