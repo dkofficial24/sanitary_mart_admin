@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/core.dart';
 import 'package:sanitary_mart_admin/core/widget/custom_search_view.dart';
@@ -29,9 +28,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void initState() {
     super.initState();
     filteredOrders = widget.orders;
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      Provider.of<OrderProvider>(context, listen: false).loadOrders();
-    });
+    // SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    //   Provider.of<OrderProvider>(context, listen: false).loadOrders();
+    // });
 
     _searchController.addListener(_onSearchChanged);
   }
