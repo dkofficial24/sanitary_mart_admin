@@ -7,7 +7,7 @@ class NotificationProvider with ChangeNotifier {
 
   NotificationProvider(this._notificationService);
 
-  List<NotificationModel> _notifications = [];
+  final List<NotificationModel> _notifications = [];
   bool _isLoading = false;
   bool _hasMore = true;
 

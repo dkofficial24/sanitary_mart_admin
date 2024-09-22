@@ -92,11 +92,11 @@ class NotificationService {
               return;
             }
             LocalNotificationService.showNotification(
-              id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-              title: 'Order Received From ${notification.userName}',
-              body:
-                  'Quantity: ${notification.noOfItem} OrderId: ${notification.orderId}',
-            );
+                id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                title: 'Order Received From ${notification.userName}',
+                body:
+                    'Quantity: ${notification.noOfItem} OrderId: ${notification.orderId}',
+                payload: notification.toJson());
           }
         }
       });

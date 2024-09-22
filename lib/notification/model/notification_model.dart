@@ -36,8 +36,22 @@ class NotificationModel {
     );
   }
 
+  factory NotificationModel.fromJson(Map<String,dynamic> data) {
+    return NotificationModel(
+      id: data['id'],
+      orderId: data['orderId'],
+      userId: data['userId'],
+      userName: data['userName'],
+      noOfItem: data['noOfItem'],
+      timestamp: data['timestamp'],
+      status: data['status'],
+      type: data['type'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'orderId': orderId,
       'userId': userId,
       'userName': userName,

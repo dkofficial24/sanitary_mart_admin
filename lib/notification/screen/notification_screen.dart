@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:sanitary_mart_admin/core/app_util.dart';
 import 'package:sanitary_mart_admin/notification/model/notification_model.dart';
 import 'package:sanitary_mart_admin/notification/provider/notification_provider.dart';
+import 'package:sanitary_mart_admin/order/ui/user_order_list_screen.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class NotificationScreen extends StatelessWidget {
@@ -132,14 +134,16 @@ class _CustomNotificationTileState extends State<CustomNotificationTile> {
       key: Key(widget.notification.id!),
       onVisibilityChanged: _onVisibilityChanged,
       child: Card(
-        color: widget.notification.status == 'read'?const Color(0xFFFFFFFF):const Color(0xFFE3F2FD),
+        color: widget.notification.status == 'read'
+            ? const Color(0xFFFFFFFF)
+            : const Color(0xFFE3F2FD),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
         child: ListTile(
-          onLongPress: (){
+          onLongPress: () {
             FlutterClipboard.copy(widget.notification.orderId)
                 .then((value) => AppUtil.showToast('OrderId Copied'));
           },
@@ -177,7 +181,10 @@ class _CustomNotificationTileState extends State<CustomNotificationTile> {
           ),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
-            // Handle notification tap
+            Get.to(UserOrderListScreen(
+              userId: widget.notification.userId,
+              orderId: widget.notification.orderId,
+            ));
           },
         ),
       ),
