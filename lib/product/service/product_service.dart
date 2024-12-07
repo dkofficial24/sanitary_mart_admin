@@ -115,16 +115,24 @@ class ProductService extends BaseService {
   }
 
   Future<List<Product>> fetchProductsFromQuery(String query) async {
-    QuerySnapshot snapshot;
-    String capitalizedQuery =
-        query.substring(0, 1).toUpperCase() + query.substring(1);
-    snapshot = await FirebaseFirestore.instance
-        .collection('products')
-        .where('name', isGreaterThanOrEqualTo: capitalizedQuery)
-        .where('name', isLessThan: '${capitalizedQuery}z')
-        .get();
-    return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
+    try {
+      String capitalizedQuery =
+          query.substring(0, 1).toUpperCase() + query.substring(1);
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .where('name', isGreaterThanOrEqualTo: capitalizedQuery)
+          .where('name', isLessThanOrEqualTo: capitalizedQuery + '\uf8ff') // Ensures coverage of all matching characters
+          .get();
+
+      return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
+    } catch (e) {
+      // Log or handle errors
+      print('Error fetching products: $e');
+      return [];
+    }
   }
+
 
   Future deleteProduct(
     String productId,
