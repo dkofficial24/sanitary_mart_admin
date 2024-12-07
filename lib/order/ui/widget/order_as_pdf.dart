@@ -104,11 +104,11 @@ pw.Document createPdfDocument(OrderModel order) {
             pw.Divider(), // Divider after order details
             pw.Text('Customer Details:', // Customer details section
                 style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Name: ${order.customer?.userName ?? "Unavailable"}',
+            pw.Text('Name: ${order.endUser?.name ?? "Unavailable"}',
                 style: const pw.TextStyle(fontSize: 16)),
-            pw.Text('Address: ${order.customer?.address ?? "Unavailable"}',
+            pw.Text('Address: ${order.endUser?.village ?? "Unavailable"}',
                 style: const pw.TextStyle(fontSize: 16)),
-            pw.Text('Phone: ${order.customer?.phone ?? "Unavailable"}',
+            pw.Text('Mobile: ${order.endUser?.mobile ?? "Unavailable"}',
                 style: const pw.TextStyle(fontSize: 16)),
             pw.Divider(), // Divider after customer details
             pw.Text('Items:',

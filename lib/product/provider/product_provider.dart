@@ -23,7 +23,7 @@ class ProductProvider extends ChangeNotifier {
     required this.brandFirebaseService,
   });
 
-  List<Product> products = [];
+  // List<Product> products = [];
   List<Category> categories = [];
   List<Brand> brands = [];
   ProviderState state = ProviderState.idle;
@@ -40,32 +40,27 @@ class ProductProvider extends ChangeNotifier {
 
   bool get isAscending => _isAscending;
 
+  List<Product> _filterProductList = [];
+
+  List<Product> get filteredProducts =>_filterProductList;
+
+  /// Updates the search query and fetches matching products
   void updateSearchQuery(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 200), () {
+    _debounce = Timer(const Duration(milliseconds: 300), () {
       _searchQuery = query;
-      notifyListeners();
+      searchProduct(_searchQuery);
     });
   }
 
+  /// Toggles the sort order and fetches products again
   void toggleSortOrder() {
     _isAscending = !_isAscending;
     notifyListeners();
   }
 
-  List<Product> get filteredProducts {
-    var filteredProducts = products.where((product) {
-      return product.name.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
-
-    filteredProducts.sort((a, b) =>
-        _isAscending ? a.stock.compareTo(b.stock) : b.stock.compareTo(a.stock));
-
-    return filteredProducts;
-  }
-
   void clearProducts() {
-    products = [];
+    _filterProductList = [];
     notifyListeners();
   }
 
@@ -82,7 +77,7 @@ class ProductProvider extends ChangeNotifier {
       String id = await productService.addProduct(product);
       product.id = id;
       await addCategoryBrandAssociation(product.categoryId, product.brandId);
-      products.add(product);
+      _filterProductList.add(product);
       AppUtil.showToast('Product added successfully!');
       state = ProviderState.idle;
       Get.back();
@@ -164,9 +159,9 @@ class ProductProvider extends ChangeNotifier {
     try {
       state = ProviderState.loading;
       notifyListeners();
-      products = await productService.fetchProductsByCategoryBrand(
+      _filterProductList = await productService.fetchProductsByCategoryBrand(
           categoryId, brandId);
-      Product.sortByCreated(products);
+      Product.sortByCreated(_filterProductList);
       state = ProviderState.idle;
       FirebaseAnalytics.instance
           .logEvent(name: 'fetch_products_by_category_brand');
@@ -187,7 +182,7 @@ class ProductProvider extends ChangeNotifier {
       notifyListeners();
 
       await productService.deleteProduct(id);
-      products.removeWhere((element) => element.id == id);
+      _filterProductList.removeWhere((element) => element.id == id);
       state = ProviderState.idle;
       FirebaseAnalytics.instance.logEvent(name: 'delete_product');
     } catch (e) {
@@ -198,16 +193,18 @@ class ProductProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> fetchProducts({int limit = 10, bool isRefresh = false}) async {
-    if (isFetchingMore || (!hasMoreProducts && !isRefresh)) return;  // Prevent duplicate fetch
+    if (isFetchingMore || (!hasMoreProducts && !isRefresh))
+      return; // Prevent duplicate fetch
 
     try {
       if (isRefresh) {
         state = ProviderState.loading;
         error = false;
         hasMoreProducts = true;
-        productService.resetPagination();  // Reset pagination for initial load
-        products.clear();  // Clear the existing products
+        productService.resetPagination(); // Reset pagination for initial load
+        filteredProducts.clear(); // Clear the existing products
       }
 
       notifyListeners();
@@ -216,17 +213,43 @@ class ProductProvider extends ChangeNotifier {
       final newProducts = await productService.fetchProducts(limit: limit);
 
       if (newProducts.isNotEmpty) {
-        products.addAll(newProducts);
+        filteredProducts.addAll(newProducts);
       }
 
       if (newProducts.length < limit) {
-        hasMoreProducts = false;  // No more products available if batch is less than limit
+        hasMoreProducts =
+            false; // No more products available if batch is less than limit
       }
     } catch (e) {
       error = true;
     } finally {
       state = ProviderState.idle;
       isFetchingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchProduct(String query) async {
+    try {
+      error = false;
+      state = ProviderState.loading;
+      notifyListeners();
+      _filterProductList = await productService.fetchProductsFromQuery(query);
+      hasMoreProducts=false;
+      state = ProviderState.idle;
+      notifyListeners();
+    } on SocketException {
+      print('searchProduct1 error');
+      error = true;
+      state = ProviderState.error;
+    } on TimeoutException {
+      print('searchProduct2 error ');
+      error = true;
+    } catch (e) {
+      print('searchProduct3 error $e');
+      error = true;
+      state = ProviderState.error;
+    } finally {
       notifyListeners();
     }
   }

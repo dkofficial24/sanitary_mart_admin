@@ -29,8 +29,13 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
 
     // Listener to detect when the user scrolls near the bottom and fetch more products
     _scrollController.addListener(() {
+      if (_searchController.text.isNotEmpty) {
+        return;
+      }
+
       if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200 && // Trigger when 200px close to the bottom
+              _scrollController.position.maxScrollExtent -
+                  200 && // Trigger when 200px close to the bottom
           !context.read<ProductProvider>().isFetchingMore) {
         fetchMoreProducts();
       }
@@ -45,7 +50,8 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
   }
 
   void fetchAllProducts() {
-    Provider.of<ProductProvider>(context, listen: false).fetchProducts(isRefresh: true);
+    Provider.of<ProductProvider>(context, listen: false)
+        .fetchProducts(isRefresh: true);
   }
 
   void fetchMoreProducts() {
@@ -112,9 +118,11 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
   }
 
   Widget body(ProductProvider provider) {
-    if (provider.state == ProviderState.loading && provider.products.isEmpty) {
+    if (provider.state == ProviderState.loading &&
+        provider.filteredProducts.isEmpty) {
       return const ShimmerGridListWidget();
-    } else if (provider.state == ProviderState.error && provider.products.isEmpty) {
+    } else if (provider.state == ProviderState.error &&
+        provider.filteredProducts.isEmpty) {
       return ErrorRetryWidget(onRetry: fetchAllProducts);
     }
 
@@ -124,7 +132,8 @@ class _ProductStockScreenState extends State<ProductStockScreen> {
 
     return ListView.builder(
       controller: _scrollController,
-      itemCount: provider.filteredProducts.length + (provider.hasMoreProducts ? 1 : 0),
+      itemCount:
+          provider.filteredProducts.length + (provider.hasMoreProducts ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < provider.filteredProducts.length) {
           final product = provider.filteredProducts[index];

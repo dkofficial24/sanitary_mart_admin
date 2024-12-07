@@ -69,16 +69,16 @@ class _ProductListScreenNewState extends State<ProductListScreenNew> {
               );
             }
 
-            if (provider.products.isEmpty) {
+            if (provider.filteredProducts.isEmpty) {
               return const Center(
                 child: Text('No products available under this brand'),
               );
             }
 
             return ListView.builder(
-              itemCount: provider.products.length,
+              itemCount: provider.filteredProducts.length,
               itemBuilder: (context, index) {
-                final Product product = provider.products[index];
+                final Product product = provider.filteredProducts[index];
 
                 return ProductListViewItemWidget(
                   product: product,

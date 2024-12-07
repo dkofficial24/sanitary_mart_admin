@@ -1,3 +1,4 @@
+import 'package:sanitary_mart_admin/core/model/end_user_model.dart';
 import 'package:sanitary_mart_admin/order/model/customer_model.dart';
 import 'package:sanitary_mart_admin/order/model/order_item.dart';
 import 'package:sanitary_mart_admin/order/model/order_status.dart';
@@ -9,6 +10,7 @@ class OrderModel {
   int? updatedAt;
   OrderStatus orderStatus;
   Customer? customer;
+  EndUser? endUser;
   bool userVerified;
   String? note;
 
@@ -16,6 +18,7 @@ class OrderModel {
     required this.orderId,
     required this.orderItems,
     this.customer,
+    this.endUser,
     this.orderStatus = OrderStatus.pending,
     this.createdAt,
     this.updatedAt,
@@ -40,7 +43,7 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     var list = json['orderItems'] as List;
     List<OrderItem> orderItemsList =
-    list.map((i) => OrderItem.fromJson(i)).toList();
+        list.map((i) => OrderItem.fromJson(i)).toList();
     return OrderModel(
       orderId: json['orderId'],
       orderItems: orderItemsList,
@@ -50,7 +53,9 @@ class OrderModel {
       orderStatus: parseOrderStatus(json['orderStatus']),
       note: json['note'],
       customer:
-      json['customer'] != null ? Customer.fromJson(json['customer']) : null,
+          json['customer'] != null ? Customer.fromJson(json['customer']) : null,
+      endUser:
+          json['endUser'] != null ? EndUser.fromJson(json['endUser']) : null,
     );
   }
 }

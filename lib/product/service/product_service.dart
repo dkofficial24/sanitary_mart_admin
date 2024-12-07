@@ -114,6 +114,18 @@ class ProductService extends BaseService {
     await batch.commit();
   }
 
+  Future<List<Product>> fetchProductsFromQuery(String query) async {
+    QuerySnapshot snapshot;
+    String capitalizedQuery =
+        query.substring(0, 1).toUpperCase() + query.substring(1);
+    snapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('name', isGreaterThanOrEqualTo: capitalizedQuery)
+        .where('name', isLessThan: '${capitalizedQuery}z')
+        .get();
+    return snapshot.docs.map((doc) => Product.fromFirebase(doc)).toList();
+  }
+
   Future deleteProduct(
     String productId,
   ) async {
@@ -122,6 +134,7 @@ class ProductService extends BaseService {
         .doc(productId)
         .delete();
   }
+
 
   void resetPagination() {
     _lastDocument = null;

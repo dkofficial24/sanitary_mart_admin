@@ -153,7 +153,7 @@ class CategoryProvider extends ChangeNotifier {
     }
   }
 
-  void resetStates(){
+  void resetStates() {
     _error = null;
     _state = ProviderState.idle;
     imageUploading = false;

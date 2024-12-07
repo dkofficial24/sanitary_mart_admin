@@ -107,17 +107,17 @@ class _OrderCardState extends State<OrderCard> {
                 ),
                 rowItem(
                   'Name:',
-                  widget.order.customer?.userName ?? 'Unavailable',
+                  widget.order.endUser?.name ?? 'Unavailable',
                 ),
                 rowItem(
                   'Address:',
-                  widget.order.customer?.address ?? 'Unavailable',
+                  widget.order.endUser?.village ?? 'Unavailable',
                 ),
                 rowItem(
                   'Phone:',
-                  (widget.order.customer?.phone != null &&
-                          widget.order.customer?.phone != 'null')
-                      ? widget.order.customer?.phone ?? 'Unavailable'
+                  (widget.order.endUser?.mobile != null &&
+                          widget.order.endUser?.mobile != 'null')
+                      ? widget.order.endUser?.mobile ?? 'Unavailable'
                       : 'Unavailable',
                 ),
               ],
