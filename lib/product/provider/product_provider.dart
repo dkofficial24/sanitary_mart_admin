@@ -23,7 +23,7 @@ class ProductProvider extends ChangeNotifier {
     required this.brandFirebaseService,
   });
 
-  // List<Product> products = [];
+   List<Product> products = [];
   List<Category> categories = [];
   List<Brand> brands = [];
   ProviderState state = ProviderState.idle;
@@ -214,6 +214,8 @@ class ProductProvider extends ChangeNotifier {
 
       if (newProducts.isNotEmpty) {
         filteredProducts.addAll(newProducts);
+        products.clear();
+        products.addAll(newProducts);
       }
 
       if (newProducts.length < limit) {
@@ -231,6 +233,9 @@ class ProductProvider extends ChangeNotifier {
 
   Future<void> searchProduct(String query) async {
     try {
+      _filterProductList = products;
+      notifyListeners();
+      if(query.isEmpty)return;
       error = false;
       state = ProviderState.loading;
       notifyListeners();
@@ -247,8 +252,8 @@ class ProductProvider extends ChangeNotifier {
       error = true;
     } catch (e) {
       print('searchProduct3 error $e');
-      error = true;
-      state = ProviderState.error;
+      // error = true;
+      // state = ProviderState.error;
     } finally {
       notifyListeners();
     }
