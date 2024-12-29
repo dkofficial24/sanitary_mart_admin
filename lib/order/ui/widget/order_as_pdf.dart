@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_utils/get_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -81,90 +80,75 @@ pw.Document createPdfDocument(OrderModel order) {
 
   // Add content to the PDF
   pdf.addPage(
-    pw.Page(
-      build: (pw.Context context) => pw.Container(
-        padding: const pw.EdgeInsets.all(10),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'Shree Balaji Sanitary & Electronics',
-              style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.Text('Bhiwani Road, Bahal',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.Text('Phone: 9555294879',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.SizedBox(height: 10),
-            pw.Text('Order ID: ${order.orderId}',
-                style:
-                pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Date: ${_formatDate(order.createdAt)}',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.Divider(), // Divider after order details
-            pw.Text('Customer Details:', // Customer details section
-                style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.Text('Name: ${order.endUser?.name ?? "Unavailable"}',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.Text('Address: ${order.endUser?.village ?? "Unavailable"}',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.Text('Mobile: ${order.endUser?.mobile ?? "Unavailable"}',
-                style: const pw.TextStyle(fontSize: 16)),
-            pw.Divider(), // Divider after customer details
-            pw.Text('Items:',
-                style:
-                pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.Table.fromTextArray(
-              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              headers: ['Sr', 'Items', 'Qty', 'Price','Total'],
-              cellAlignment: pw.Alignment.centerLeft,
-              cellStyle: const pw.TextStyle(fontSize: 14),
-              data: order.orderItems.map((item) {
-                return [
-                  (order.orderItems.indexOf(item) + 1).toString(),
-                  item.productName,
-                  item.quantity.toString(),
-                  (item.price).toStringAsFixed(2),
-                  (item.price*item.quantity).toStringAsFixed(2),
-                ];
-              }).toList(),
-            ),
-            pw.Divider(), // Divider after order items
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Text('SubTotal:', style: const pw.TextStyle(fontSize: 16)),
-                pw.Text(
-                  total.toStringAsFixed(2),
-                  style: const pw.TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-            // if (discount > 0)
-            //   pw.Row(
-            //     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       pw.Text(
-            //         'Point:',
-            //         style: const pw.TextStyle(
-            //           fontSize: 16,
-            //         ),
-            //       ),
-            //       pw.Text(
-            //         (discount / 10).toStringAsFixed(2),
-            //         style: const pw.TextStyle(
-            //           fontSize: 16,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-          ],
-        ),
-      ),
+    pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(10),
+      build: (pw.Context context) {
+        return [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Shree Balaji Sanitary & Electronics',
+                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+              ),
+              pw.Text('Bhiwani Road, Bahal',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.Text('Phone: 9555294879',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.SizedBox(height: 10),
+              pw.Text('Order ID: ${order.orderId}',
+                  style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Date: ${_formatDate(order.createdAt)}',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.Divider(),
+              pw.Text('Customer Details:',
+                  style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text('Name: ${order.endUser?.name ?? "Unavailable"}',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.Text('Address: ${order.endUser?.village ?? "Unavailable"}',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.Text('Mobile: ${order.endUser?.mobile ?? "Unavailable"}',
+                  style: const pw.TextStyle(fontSize: 16)),
+              pw.Divider(),
+              pw.Text('Items:',
+                  style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            ],
+          ),
+          pw.TableHelper.fromTextArray(
+            headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            headers: ['Sr', 'Items', 'Qty', 'Price', 'Total'],
+            cellAlignment: pw.Alignment.centerLeft,
+            cellStyle: const pw.TextStyle(fontSize: 14),
+            data: order.orderItems.map((item) {
+              return [
+                (order.orderItems.indexOf(item) + 1).toString(),
+                item.productName,
+                item.quantity.toString(),
+                (item.price).toStringAsFixed(2),
+                (item.price * item.quantity).toStringAsFixed(2),
+              ];
+            }).toList(),
+          ),
+          pw.Divider(),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('SubTotal:', style: const pw.TextStyle(fontSize: 16)),
+              pw.Text(
+                total.toStringAsFixed(2),
+                style: const pw.TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ];
+      },
     ),
   );
+
   return pdf;
 }
+
 
 
 String _formatDate(int? timestamp) {
